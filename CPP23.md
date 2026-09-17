@@ -1,28 +1,28 @@
 # C++23
 
-## Overview
-Many of these descriptions and examples are taken from various resources (see [Acknowledgements](#acknowledgements) section) and summarized in my own words.
+## 概述
+本文中的许多描述和示例来自各种资源（参见 [致谢](#致谢) 部分），并由我用自己的话进行了总结。
 
-C++23 includes the following new language features:
+C++23 包含以下新的语言特性：
 - [consteval if](#consteval-if)
-- [deducing `this`](#deducing-this)
-- [multidimensional subscript operator](#multidimensional-subscript-operator)
-- [increasing range-based `for` safety](#increasing-range-based-for-safety)
+- [推导 `this`](#推导-this)
+- [多维下标运算符](#多维下标运算符)
+- [提高基于范围的 `for` 循环的安全性](#提高基于范围的-for-循环的安全性)
 
-C++23 includes the following new library features:
-- [stacktrace library](#stacktrace-library)
-- [contains for strings and string views](#contains-for-strings-and-string-views)
+C++23 包含以下新的库特性：
+- [stacktrace 库](#stacktrace-库)
+- [字符串和 string_view 的 `contains`](#字符串和-string_view-的-contains)
 - [std::to_underlying](#stdto_underlying)
 - [`spanstream`](#spanstream)
-- [input/output pointers](#inputoutput-pointers)
-- [monadic operations for `std::optional`](#monadic-operations-for-stdoptional)
+- [输入/输出指针](#输入输出指针)
+- [`std::optional` 的单子操作](#stdoptional-的单子操作)
 - [`std::expected`](#stdexpected)
 - [`std::unreachable`](#stdunreachable)
 
-## C++23 Language Features
+## C++23 语言特性
 
 ### consteval if
-Write code that is instantiated during constant evaluation.
+编写在常量求值期间被实例化的代码。
 ```c++
 consteval int f(int i) { return i; }
 
@@ -35,8 +35,8 @@ constexpr int g(int i) {
 }
 ```
 
-### Deducing `this`
-Using explicit object member functions introduced in C++23, deducing the object's type and value category is now possible by specifying the first parameter of a member function prefixed with the `this` keyword:
+### 推导 `this`
+借助 C++23 引入的显式对象成员函数，现在可以通过将成员函数的第一个参数以 `this` 关键字为前缀来推导对象的类型和值类别：
 ```c++
 // NEW WAY USING DEDUCING THIS:
 struct T {
@@ -56,8 +56,8 @@ struct T {
 };
 ```
 
-### Multidimensional subscript operator
-Specify zero or more arguments to the `operator[]` operator:
+### 多维下标运算符
+为 `operator[]` 运算符指定零个或多个参数：
 ```c++
 template <typename T, std::size_t Z, std::size_t Y, std::size_t X>
 struct Array3d {
@@ -72,10 +72,10 @@ Array3d<int, 4, 3, 2> v;
 v[3, 2, 1] = 42;
 ```
 
-### Increasing range-based `for` safety
-Fixes some of the notorious lifetime issues with one of the most important control structures in C++.
+### 提高基于范围的 `for` 循环的安全性
+修复了 C++ 中最重要的控制结构之一的一些臭名昭著的生命周期问题。
 
-Some examples of code snippets that were broken pre-C++23 that are now fixed:
+一些在 C++23 之前有问题、现在已被修复的代码片段示例：
 
 * `for (auto e : getTmp().getRef())`
 * `for (auto e : getVector()[0])`
@@ -84,12 +84,12 @@ Some examples of code snippets that were broken pre-C++23 that are now fixed:
 * `for (auto e : getOptionalCollection().value())`
 * `for (char c : get<std::string>(getVariant()))`
 
-## C++23 Library Features
+## C++23 库特性
 
-### Stacktrace library
-A stacktrace is an approximate representation of an invocation sequence and consists of stacktrace entries. A stacktrace entry (represented by `std::stacktrace_entry`) consists of information including the source file and line number, and a description field.
+### Stacktrace 库
+栈回溯（stacktrace）是对调用序列的一种近似表示，由栈回溯条目组成。一个栈回溯条目（由 `std::stacktrace_entry` 表示）包含的信息包括源文件和行号，以及一个描述字段。
 
-Example output on a Linux system:
+在 Linux 系统上的示例输出：
 ```c++
 #include <print>
 #include <stacktrace>
@@ -105,15 +105,15 @@ int main() {
   3#  _start [0x5ee42e3db644]
 ```
 
-### `contains` for strings and string views
-A simpler function for querying if a substring is contained within a string or string view:
+### 字符串和 string_view 的 `contains`
+一个更简单的函数，用于查询某个子串是否包含在字符串或 string_view 中：
 ```c++
 std::string{"foobarbaz"}.contains("bar"); // == true
 std::string{"foobarbaz"}.contains("bat"); // == false
 ```
 
 ### `std::to_underlying`
-Supports the common utility of converting an enumeration to its underlying type:
+支持将枚举转换为其底层类型的常见工具：
 ```c++
 enum class MyEnum : int { A = 1, B, C };
 std::to_underlying(MyEnum::A); // == 1
@@ -121,7 +121,7 @@ std::to_underlying(MyEnum::C); // == 3
 ```
 
 ### `spanstream`
-A `strstream` replacement using a character span as an externally-provided buffer. No ownership or re-allocation on the buffer.
+一个 `strstream` 的替代品，使用字符 span 作为外部提供的缓冲区。对缓冲区没有所有权，也不会重新分配。
 ```c++
 char input[] = "10 20 30";
 std::ispanstream is{std::span<char>{input}};
@@ -137,10 +137,10 @@ os << 10 << 20 << 30;
 std::span<char> sp = os.span();
 ```
 
-### Input/output pointers
-`std::out_ptr` and `std::inout_ptr` are abstractions to support both C APIs and smart pointers by creating a temporary pointer-to-pointer that updates the smart pointer when it destructs. In short: it's a thing convertible to a `T**` that updates (with a `reset` call or semantically equivalent behavior) the smart pointer it is created with when it goes out of scope.
+### 输入/输出指针
+`std::out_ptr` 和 `std::inout_ptr` 是用于同时支持 C API 和智能指针的抽象：它们创建一个临时的二级指针，并在其析构时更新智能指针。简而言之：它是一个可转换为 `T**` 的东西，在离开作用域时会更新（通过 `reset` 调用或语义上等价的行为）它所基于的智能指针。
 
-This abstraction also safely manages the lifetime of the associated memory when exceptions are thrown.
+当抛出异常时，这个抽象还能安全地管理相关内存的生命周期。
 ```c++
 // p_handle is written (out) to.
 int c_api_create_handle(MyHandle** p_handle);
@@ -165,10 +165,10 @@ int err = c_api_recreate_handle(std::inout_ptr(resource), resource_deleter{});
 // `resource` now shares the memory allocated within `c_api_recreate_handle`.
 ```
 
-Both inout/out pointers support casts to `void**` (implicitly), and explicitly to user-specified types.
+inout/out 指针都支持（隐式地）转换为 `void**`，并支持显式地转换为用户指定的类型。
 
-### Monadic operations for `std::optional`
-Support various `and_then`, `transform`, and `or_else` operations for `std::optional`.
+### `std::optional` 的单子操作
+为 `std::optional` 支持各种 `and_then`、`transform` 和 `or_else` 操作。
 ```c++
 std::optional<int> parse_int(const std::string&);
 std::optional<int> ensure_non_negative(int);
@@ -185,9 +185,9 @@ std::optional<double> stringToSqrtDouble(const std::string& input) {
 ```
 
 ### `std::expected`
-`std::expected` provides a way to represent a value and a potential error value, both contained in one type. Also supports a variety of monadic operations on both the expected and unexpected (i.e. error) values.
+`std::expected` 提供了一种方式，将值和潜在的错误值都包含在同一个类型中。它还支持对期望值和意外（即错误）值的一系列单子操作。
 
-Use `std::unexpected` to store an unexpected (i.e. error) value.
+使用 `std::unexpected` 来存储一个意外（即错误）值。
 ```c++
 enum class StringToSqrtDoubleError {
     ParseError, NegativeNumber
@@ -207,7 +207,7 @@ std::expected<double, StringToSqrtDoubleError> stringToSqrtDouble(const std::str
 ```
 
 ### `std::unreachable`
-Provides a way to explicitly mark a code path as unreachable. May exhibit undefined behavior if the code path is reached.
+提供了一种显式地将某条代码路径标记为不可达的方式。如果该代码路径真的被执行到，可能会表现出未定义行为。
 ```c++
 enum class MyEnum { A, B, C };
 
@@ -221,22 +221,22 @@ int convertMyEnumToInt(MyEnum e) {
 }
 ```
 
-## Acknowledgements
-* [cppreference](http://en.cppreference.com/w/cpp) - especially useful for finding examples and documentation of new library features.
-* [C++ Rvalue References Explained](http://web.archive.org/web/20240324121501/http://thbecker.net/articles/rvalue_references/section_01.html) - a great introduction I used to understand rvalue references, perfect forwarding, and move semantics.
-* [clang](http://clang.llvm.org/cxx_status.html) and [gcc](https://gcc.gnu.org/projects/cxx-status.html)'s standards support pages. Also included here are the proposals for language/library features that I used to help find a description of, what it's meant to fix, and some examples.
+## 致谢
+* [cppreference](http://en.cppreference.com/w/cpp) - 对查找新库特性的示例和文档特别有用。
+* [C++ Rvalue References Explained](http://web.archive.org/web/20240324121501/http://thbecker.net/articles/rvalue_references/section_01.html) - 我用来理解右值引用、完美转发和移动语义的优秀入门资料。
+* [clang](http://clang.llvm.org/cxx_status.html) 和 [gcc](https://gcc.gnu.org/projects/cxx-status.html) 的标准支持页面。其中还包含了语言/库特性的提案，我借助这些提案来了解相关特性的描述、它要解决的问题以及一些示例。
 * [Compiler explorer](https://godbolt.org/)
-* [Scott Meyers' Effective Modern C++](https://www.amazon.com/Effective-Modern-Specific-Ways-Improve/dp/1491903996) - highly recommended book!
-* [Jason Turner's C++ Weekly](https://www.youtube.com/channel/UCxHAlbZQNFU2LgEtiqd2Maw) - nice collection of C++-related videos.
+* [Scott Meyers 的《Effective Modern C++》](https://www.amazon.com/Effective-Modern-Specific-Ways-Improve/dp/1491903996) - 强烈推荐的书！
+* [Jason Turner 的 C++ Weekly](https://www.youtube.com/channel/UCxHAlbZQNFU2LgEtiqd2Maw) - 优秀的 C++ 相关视频合集。
 * [What can I do with a moved-from object?](http://stackoverflow.com/questions/7027523/what-can-i-do-with-a-moved-from-object)
 * [What are some uses of decltype(auto)?](http://stackoverflow.com/questions/24109737/what-are-some-uses-of-decltypeauto)
-* And many more SO posts I'm forgetting...
+* 以及许多我已经忘记的 Stack Overflow 帖子……
 
-## Author
+## 作者
 Anthony Calandra
 
-## Content Contributors
-See: https://github.com/AnthonyCalandra/modern-cpp-features/graphs/contributors
+## 内容贡献者
+参见：https://github.com/AnthonyCalandra/modern-cpp-features/graphs/contributors
 
-## License
+## 许可证
 MIT

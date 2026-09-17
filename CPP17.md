@@ -1,27 +1,27 @@
 # C++17
 
-## Overview
-Many of these descriptions and examples are taken from various resources (see [Acknowledgements](#acknowledgements) section) and summarized in my own words.
+## 概述
+本文中的许多描述和示例来自各种资源（参见 [致谢](#致谢) 部分），并由我用自己的话进行了总结。
 
-C++17 includes the following new language features:
-- [template argument deduction for class templates](#template-argument-deduction-for-class-templates)
-- [declaring non-type template parameters with auto](#declaring-non-type-template-parameters-with-auto)
-- [folding expressions](#folding-expressions)
-- [new rules for auto deduction from braced-init-list](#new-rules-for-auto-deduction-from-braced-init-list)
+C++17 包含以下新的语言特性：
+- [类模板的模板实参推导](#类模板的模板实参推导)
+- [用 auto 声明非类型模板参数](#用-auto-声明非类型模板参数)
+- [折叠表达式](#折叠表达式)
+- [从花括号初始化列表进行 auto 推导的新规则](#从花括号初始化列表进行-auto-推导的新规则)
 - [constexpr lambda](#constexpr-lambda)
-- [lambda capture this by value](#lambda-capture-this-by-value)
-- [inline variables](#inline-variables)
-- [nested namespaces](#nested-namespaces)
-- [structured bindings](#structured-bindings)
-- [selection statements with initializer](#selection-statements-with-initializer)
+- [按值捕获 this 的 lambda](#按值捕获-this-的-lambda)
+- [内联变量](#内联变量)
+- [嵌套命名空间](#嵌套命名空间)
+- [结构化绑定](#结构化绑定)
+- [带初始化器的选择语句](#带初始化器的选择语句)
 - [constexpr if](#constexpr-if)
-- [utf-8 character literals](#utf-8-character-literals)
-- [direct-list-initialization of enums](#direct-list-initialization-of-enums)
-- [\[\[fallthrough\]\], \[\[nodiscard\]\], \[\[maybe_unused\]\] attributes](#fallthrough-nodiscard-maybe_unused-attributes)
-- [\_\_has\_include](#\_\_has\_include)
-- [class template argument deduction](#class-template-argument-deduction)
+- [UTF-8 字符字面量](#utf-8-字符字面量)
+- [枚举的直接列表初始化](#枚举的直接列表初始化)
+- [\[\[fallthrough\]\]、\[\[nodiscard\]\]、\[\[maybe_unused\]\] 属性](#fallthroughnodiscardmaybe_unused-属性)
+- [`__has_include`](#__has_include)
+- [类模板实参推导（CTAD）](#类模板实参推导ctad)
 
-C++17 includes the following new library features:
+C++17 包含以下新的库特性：
 - [std::variant](#stdvariant)
 - [std::optional](#stdoptional)
 - [std::any](#stdany)
@@ -30,21 +30,21 @@ C++17 includes the following new library features:
 - [std::apply](#stdapply)
 - [std::filesystem](#stdfilesystem)
 - [std::byte](#stdbyte)
-- [splicing for maps and sets](#splicing-for-maps-and-sets)
-- [parallel algorithms](#parallel-algorithms)
+- [map 和 set 的拼接（splicing）](#map-和-set-的拼接splicing)
+- [并行算法](#并行算法)
 - [std::sample](#stdsample)
 - [std::clamp](#stdclamp)
 - [std::reduce](#stdreduce)
-- [prefix sum algorithms](#prefix-sum-algorithms)
-- [gcd and lcm](#gcd-and-lcm)
+- [前缀和算法](#前缀和算法)
+- [GCD 和 LCM](#gcd-和-lcm)
 - [std::not_fn](#stdnot_fn)
-- [string conversion to/from numbers](#string-conversion-tofrom-numbers)
-- [rounding functions for chrono durations and timepoints](#rounding-functions-for-chrono-durations-and-timepoints)
+- [字符串与数字之间的转换](#字符串与数字之间的转换)
+- [用于 chrono duration 和 timepoint 的取整函数](#用于-chrono-duration-和-timepoint-的取整函数)
 
-## C++17 Language Features
+## C++17 语言特性
 
-### Template argument deduction for class templates
-Automatic template argument deduction much like how it's done for functions, but now including class constructors.
+### 类模板的模板实参推导
+类似于函数模板的自动模板实参推导，但现在也包括了类的构造函数。
 ```c++
 template <typename T = float>
 struct MyContainer {
@@ -57,8 +57,8 @@ MyContainer c1 {1}; // OK MyContainer<int>
 MyContainer c2; // OK MyContainer<float>
 ```
 
-### Declaring non-type template parameters with auto
-Following the deduction rules of `auto`, while respecting the non-type template parameter list of allowable types[\*], template arguments can be deduced from the types of its arguments:
+### 用 auto 声明非类型模板参数
+遵循 `auto` 的推导规则，同时遵守允许作为非类型模板参数的类型列表[\*]，模板实参可以从其参数的类型中推导出来：
 ```c++
 template <auto... seq>
 struct my_integer_sequence {
@@ -70,12 +70,12 @@ auto seq = std::integer_sequence<int, 0, 1, 2>();
 // Type is deduced to be `int`.
 auto seq2 = my_integer_sequence<0, 1, 2>();
 ```
-\* - For example, you cannot use a `double` as a template parameter type, which also makes this an invalid deduction using `auto`.
+\* - 例如，你不能把 `double` 用作模板参数类型，这也使得使用 `auto` 的这种推导无效。
 
-### Folding expressions
-A fold expression performs a fold of a template parameter pack over a binary operator.
-* An expression of the form `(... op e)` or `(e op ...)`, where `op` is a fold-operator and `e` is an unexpanded parameter pack, are called _unary folds_.
-* An expression of the form `(e1 op ... op e2)`, where `op` are fold-operators, is called a _binary fold_. Either `e1` or `e2` is an unexpanded parameter pack, but not both.
+### 折叠表达式
+折叠表达式会对一个模板参数包按某个二元运算符进行折叠。
+* 形如 `(... op e)` 或 `(e op ...)` 的表达式，其中 `op` 是折叠运算符，`e` 是未展开的参数包，称为*一元折叠*。
+* 形如 `(e1 op ... op e2)` 的表达式，其中 `op` 是折叠运算符，称为*二元折叠*。`e1` 或 `e2` 中有一个是未展开的参数包，但不能两个都是。
 ```c++
 template <typename... Args>
 bool logicalAnd(Args... args) {
@@ -95,8 +95,8 @@ auto sum(Args... args) {
 sum(1.0, 2.0f, 3); // == 6.0
 ```
 
-### New rules for auto deduction from braced-init-list
-Changes to `auto` deduction when used with the uniform initialization syntax. Previously, `auto x {3};` deduces a `std::initializer_list<int>`, which now deduces to `int`.
+### 从花括号初始化列表进行 auto 推导的新规则
+在使用统一初始化语法时对 `auto` 推导的修改。以前 `auto x {3};` 推导为 `std::initializer_list<int>`，现在则推导为 `int`。
 ```c++
 auto x1 {1, 2, 3}; // error: not a single element
 auto x2 = {1, 2, 3}; // x2 is std::initializer_list<int>
@@ -105,7 +105,7 @@ auto x4 {3.0}; // x4 is double
 ```
 
 ### constexpr lambda
-Compile-time lambdas using `constexpr`.
+使用 `constexpr` 的编译期 lambda。
 ```c++
 auto identity = [](int n) constexpr { return n; };
 static_assert(identity(123) == 123);
@@ -127,8 +127,8 @@ constexpr int addOne(int n) {
 static_assert(addOne(1) == 2);
 ```
 
-### Lambda capture `this` by value
-Capturing `this` in a lambda's environment was previously reference-only. An example of where this is problematic is asynchronous code using callbacks that require an object to be available, potentially past its lifetime. `*this` (C++17) will now make a copy of the current object, while `this` (C++11) continues to capture by reference.
+### 按值捕获 `this` 的 lambda
+以前在 lambda 的环境中捕获 `this` 只能是按引用捕获。一个会出问题的例子是使用回调的异步代码：它要求对象在（可能超出其生命周期的）某个时刻仍然可用。`*this`（C++17）现在会复制当前对象，而 `this`（C++11）则继续按引用捕获。
 ```c++
 struct MyObj {
   int value {123};
@@ -147,8 +147,8 @@ valueCopy(); // 123
 valueRef(); // 321
 ```
 
-### Inline variables
-The inline specifier can be applied to variables as well as to functions. A variable declared inline has the same semantics as a function declared inline.
+### 内联变量
+inline 说明符不仅可以用于函数，也可以用于变量。声明为内联的变量与声明为内联的函数具有相同的语义。
 ```c++
 // Disassembly example using compiler explorer.
 struct S { int x; };
@@ -160,7 +160,7 @@ S x2 = S{123};        // mov eax, dword ptr [.L_ZZ4mainE2x2]
                       // .L_ZZ4mainE2x2: .long 123
 ```
 
-It can also be used to declare and define a static member variable, such that it does not need to be initialized in the source file.
+它还可以用于声明并定义一个静态成员变量，这样就不需要在源文件中初始化它了。
 ```c++
 struct S {
   S() : id{count++} {}
@@ -170,8 +170,8 @@ struct S {
 };
 ```
 
-### Nested namespaces
-Using the namespace resolution operator to create nested namespace definitions.
+### 嵌套命名空间
+使用命名空间解析运算符来创建嵌套的命名空间定义。
 ```c++
 namespace A {
   namespace B {
@@ -182,15 +182,15 @@ namespace A {
 }
 ```
 
-The code above can be written like this:
+上面的代码可以写成这样：
 ```c++
 namespace A::B::C {
   int i;
 }
 ```
 
-### Structured bindings
-A proposal for de-structuring initialization, that would allow writing `auto [ x, y, z ] = expr;` where the type of `expr` was a tuple-like object, whose elements would be bound to the variables `x`, `y`, and `z` (which this construct declares). _Tuple-like objects_ include [`std::tuple`](README.md#tuples), `std::pair`, [`std::array`](README.md#stdarray), and aggregate structures.
+### 结构化绑定
+一项关于解构初始化的提案，它允许编写 `auto [ x, y, z ] = expr;`，其中 `expr` 的类型是类元组（tuple-like）对象，其元素会被绑定到变量 `x`、`y`、`z`（由该构造声明）。*类元组对象*包括 [`std::tuple`](README.md#tuples)、`std::pair`、[`std::array`](README.md#stdarray) 以及聚合结构体。
 ```c++
 using Coordinate = std::pair<int, int>;
 Coordinate origin() {
@@ -214,8 +214,8 @@ for (const auto& [key, value] : mapping) {
 }
 ```
 
-### Selection statements with initializer
-New versions of the `if` and `switch` statements which simplify common code patterns and help users keep scopes tight.
+### 带初始化器的选择语句
+`if` 和 `switch` 语句的新版本，它们简化了常见的代码模式，并帮助用户保持作用域紧凑。
 ```c++
 {
   std::lock_guard<std::mutex> lk(mx);
@@ -240,7 +240,7 @@ switch (Foo gadget(args); auto s = gadget.status()) {
 ```
 
 ### constexpr if
-Write code that is instantiated depending on a compile-time condition.
+编写根据编译期条件来决定是否实例化的代码。
 ```c++
 template <typename T>
 constexpr bool isIntegral() {
@@ -257,14 +257,14 @@ struct S {};
 static_assert(isIntegral<S>() == false);
 ```
 
-### UTF-8 character literals
-A character literal that begins with `u8` is a character literal of type `char`. The value of a UTF-8 character literal is equal to its ISO 10646 code point value.
+### UTF-8 字符字面量
+以 `u8` 开头的字符字面量是 `char` 类型的字符字面量。UTF-8 字符字面量的值等于其 ISO 10646 码点值。
 ```c++
 char x = u8'x';
 ```
 
-### Direct list initialization of enums
-Enums can now be initialized using braced syntax.
+### 枚举的直接列表初始化
+枚举现在可以使用花括号语法来初始化。
 ```c++
 enum byte : unsigned char {};
 byte b {0}; // OK
@@ -273,9 +273,9 @@ byte d = byte{1}; // OK
 byte e = byte{256}; // ERROR
 ```
 
-### \[\[fallthrough\]\], \[\[nodiscard\]\], \[\[maybe_unused\]\] attributes
-C++17 introduces three new attributes: `[[fallthrough]]`, `[[nodiscard]]` and `[[maybe_unused]]`.
-* `[[fallthrough]]` indicates to the compiler that falling through in a switch statement is intended behavior. This attribute may only be used in a switch statement, and must be placed before the next case/default label.
+### \[\[fallthrough\]\]、\[\[nodiscard\]\]、\[\[maybe_unused\]\] 属性
+C++17 引入了三个新属性：`[[fallthrough]]`、`[[nodiscard]]` 和 `[[maybe_unused]]`。
+* `[[fallthrough]]` 向编译器表明 switch 语句中的贯穿（fall through）是有意为之的行为。该属性只能用在 switch 语句中，并且必须放在下一个 case/default 标签之前。
 ```c++
 switch (n) {
   case 1: 
@@ -292,7 +292,7 @@ switch (n) {
 }
 ```
 
-* `[[nodiscard]]` issues a warning when either a function or class has this attribute and its return value is discarded.
+* 当函数或类带有 `[[nodiscard]]` 属性而其返回值被丢弃时，会发出警告。
 ```c++
 [[nodiscard]] bool do_something() {
   return is_success; // true for success, false for failure
@@ -317,7 +317,7 @@ do_something(); // warning: ignoring returned value of type 'error_info',
                 // declared with attribute 'nodiscard'
 ```
 
-* `[[maybe_unused]]` indicates to the compiler that a variable or parameter might be unused and is intended.
+* `[[maybe_unused]]` 向编译器表明某个变量或参数可能未被使用，这是有意为之的。
 ```c++
 void my_callback(std::string msg, [[maybe_unused]] bool error) {
   // Don't care if `msg` is an error message, just log it.
@@ -325,11 +325,11 @@ void my_callback(std::string msg, [[maybe_unused]] bool error) {
 }
 ```
 
-### \_\_has\_include
+### `__has_include`
 
-`__has_include (operand)` operator may be used in `#if` and `#elif` expressions to check whether a header or source file (`operand`) is available for inclusion or not.
+`__has_include (operand)` 运算符可以用在 `#if` 和 `#elif` 表达式中，用来检查某个头文件或源文件（`operand`）是否可用于包含。
 
-One use case of this would be using two libraries that work the same way, using the backup/experimental one if the preferred one is not found on the system.
+它的一个用例是：使用两个功能相同的库，当系统上找不到首选的那个时，就使用备用的/实验性的那个。
 
 ```c++
 #ifdef __has_include
@@ -346,7 +346,7 @@ One use case of this would be using two libraries that work the same way, using 
 #endif
 ```
 
-It can also be used to include headers existing under different names or locations on various platforms, without knowing which platform the program is running on, OpenGL headers are a good example for this which are located in `OpenGL\` directory on macOS and `GL\` on other platforms.
+它还可以用来在不知道程序运行于哪个平台的情况下，包含在不同平台上以不同名称或位置存在的头文件。OpenGL 的头文件就是一个很好的例子：在 macOS 上它们位于 `OpenGL\` 目录，而在其他平台上位于 `GL\` 目录。
 
 ```c++
 #ifdef __has_include
@@ -362,8 +362,8 @@ It can also be used to include headers existing under different names or locatio
 #endif
 ```
 
-### Class template argument deduction
-*Class template argument deduction* (CTAD) allows the compiler to deduce template arguments from constructor arguments.
+### 类模板实参推导（CTAD）
+*类模板实参推导*（CTAD）允许编译器从构造函数的实参中推导模板实参。
 ```c++
 std::vector v{ 1, 2, 3 }; // deduces std::vector<int>
 
@@ -373,7 +373,7 @@ auto lck = std::lock_guard{ mtx }; // deduces to std::lock_guard<std::mutex>
 auto p = new std::pair{ 1.0, 2.0 }; // deduces to std::pair<double, double>*
 ```
 
-For user-defined types, *deduction guides* can be used to guide the compiler how to deduce template arguments if applicable:
+对于用户定义的类型，如果适用，可以使用*推导指引*（deduction guide）来指导编译器如何推导模板实参：
 ```c++
 template <typename T>
 struct container {
@@ -395,10 +395,10 @@ auto b = container{ v.begin(), v.end() }; // OK: deduces container<double>
 container c{ 5, 6 }; // ERROR: std::iterator_traits<int>::value_type is not a type
 ```
 
-## C++17 Library Features
+## C++17 库特性
 
 ### std::variant
-The class template `std::variant` represents a type-safe `union`. An instance of `std::variant` at any given time holds a value of one of its alternative types (it's also possible for it to be valueless).
+类模板 `std::variant` 表示一个类型安全的 `union`。`std::variant` 的实例在任意时刻持有其备选类型之一的值（也可能处于无值状态）。
 ```c++
 std::variant<int, double> v{ 12 };
 std::get<int>(v); // == 12
@@ -409,7 +409,7 @@ std::get<1>(v); // == 12.0
 ```
 
 ### std::optional
-The class template `std::optional` manages an optional contained value, i.e. a value that may or may not be present. A common use case for optional is the return value of a function that may fail.
+类模板 `std::optional` 管理一个可选的所含值，即一个可能存在也可能不存在的值。optional 的一个常见用例是可能失败的函数的返回值。
 ```c++
 std::optional<std::string> create(bool b) {
   if (b) {
@@ -428,7 +428,7 @@ if (auto str = create(true)) {
 ```
 
 ### std::any
-A type-safe container for single values of any type.
+一个类型安全的容器，可以存放任意类型的单个值。
 ```c++
 std::any x {5};
 x.has_value() // == true
@@ -438,7 +438,7 @@ std::any_cast<int>(x) // == 10
 ```
 
 ### std::string_view
-A non-owning reference to a string. Useful for providing an abstraction on top of strings (e.g. for parsing).
+对字符串的非拥有引用。在为字符串提供抽象层（例如用于解析）时很有用。
 ```c++
 // Regular strings.
 std::string_view cppstr {"foo"};
@@ -457,7 +457,7 @@ v; // == "trim me"
 ```
 
 ### std::invoke
-Invoke a `Callable` object with parameters. Examples of *callable* objects are `std::function` or lambdas; objects that can be called similarly to a regular function.
+使用参数调用一个 `Callable` 对象。*可调用*对象的例子有 `std::function` 或 lambda；也就是可以像普通函数一样被调用的对象。
 ```c++
 template <typename Callable>
 class Proxy {
@@ -479,7 +479,7 @@ p(1, 2); // == 3
 ```
 
 ### std::apply
-Invoke a `Callable` object with a tuple of arguments.
+使用一个参数元组调用一个 `Callable` 对象。
 ```c++
 auto add = [](int x, int y) {
   return x + y;
@@ -488,9 +488,9 @@ std::apply(add, std::make_tuple(1, 2)); // == 3
 ```
 
 ### std::filesystem
-The new `std::filesystem` library provides a standard way to manipulate files, directories, and paths in a filesystem.
+新的 `std::filesystem` 库提供了一种操作文件系统中文件、目录和路径的标准方式。
 
-Here, a big file is copied to a temporary path if there is available space:
+在下面的例子中，如果有可用空间，就把一个大文件复制到临时路径：
 ```c++
 const auto bigFilePath {"bigFileToCopy"};
 if (std::filesystem::exists(bigFilePath)) {
@@ -504,7 +504,7 @@ if (std::filesystem::exists(bigFilePath)) {
 ```
 
 ### std::byte
-The new `std::byte` type provides a standard way of representing data as a byte. Benefits of using `std::byte` over `char` or `unsigned char` is that it is not a character type, and is also not an arithmetic type; while the only operator overloads available are bitwise operations.
+新的 `std::byte` 类型提供了一种将数据表示为字节的标准方式。与 `char` 或 `unsigned char` 相比，使用 `std::byte` 的好处在于它既不是字符类型，也不是算术类型；唯一可用的运算符重载是按位运算。
 ```c++
 std::byte a {0};
 std::byte b {0xFF};
@@ -512,12 +512,12 @@ int i = std::to_integer<int>(b); // 0xFF
 std::byte c = a & b;
 int j = std::to_integer<int>(c); // 0
 ```
-Note that `std::byte` is simply an enum, and braced initialization of enums become possible thanks to [direct-list-initialization of enums](#direct-list-initialization-of-enums).
+注意，`std::byte` 实际上就是一个枚举，而枚举的花括号初始化之所以可行，要归功于[枚举的直接列表初始化](#枚举的直接列表初始化)。
 
-### Splicing for maps and sets
-Moving nodes and merging containers without the overhead of expensive copies, moves, or heap allocations/deallocations.
+### map 和 set 的拼接（splicing）
+在不产生昂贵的复制、移动或堆分配/释放开销的情况下移动节点和合并容器。
 
-Moving elements from one map to another:
+从一个 map 移动元素到另一个 map：
 ```c++
 std::map<int, string> src {{1, "one"}, {2, "two"}, {3, "buckle my shoe"}};
 std::map<int, string> dst {{3, "three"}};
@@ -526,7 +526,7 @@ dst.insert(src.extract(2)); // Cheap remove and insert of { 2, "two" } from `src
 // dst == { { 1, "one" }, { 2, "two" }, { 3, "three" } };
 ```
 
-Inserting an entire set:
+插入整个 set：
 ```c++
 std::set<int> src {1, 3, 5};
 std::set<int> dst {2, 4, 5};
@@ -535,7 +535,7 @@ dst.merge(src);
 // dst == { 1, 2, 3, 4, 5 }
 ```
 
-Inserting elements which outlive the container:
+插入生命周期长于容器的元素：
 ```c++
 auto elementFactory() {
   std::set<...> s;
@@ -545,7 +545,7 @@ auto elementFactory() {
 s2.insert(elementFactory());
 ```
 
-Changing the key of a map element:
+修改 map 元素的键：
 ```c++
 std::map<int, string> m {{1, "one"}, {2, "two"}, {3, "three"}};
 auto e = m.extract(2);
@@ -554,9 +554,8 @@ m.insert(std::move(e));
 // m == { { 1, "one" }, { 3, "three" }, { 4, "two" } }
 ```
 
-### Parallel algorithms
-Many of the STL algorithms, such as the `copy`, `find` and `sort` methods, started to support the *parallel execution policies*: `seq`, `par` and `par_unseq` which translate to "sequentially", "parallel" and "parallel unsequenced".
-
+### 并行算法
+许多 STL 算法（例如 `copy`、`find` 和 `sort`）开始支持*并行执行策略*：`seq`、`par` 和 `par_unseq`，分别对应“顺序”、“并行”和“并行非顺序”。
 ```c++
 std::vector<int> longVector;
 // Find element using parallel execution policy
@@ -566,7 +565,7 @@ auto result2 = std::sort(std::execution::seq, std::begin(longVector), std::end(l
 ```
 
 ### std::sample
-Samples n elements in the given sequence (without replacement) where every element has an equal chance of being selected.
+从给定序列中（无放回地）抽取 n 个元素，每个元素被选中的概率相同。
 ```c++
 const std::string ALLOWED_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 std::string guid;
@@ -578,7 +577,7 @@ std::cout << guid; // e.g. G1fW2
 ```
 
 ### std::clamp
-Clamp given value between a lower and upper bound.
+将给定值限制在上下界之间。
 ```c++
 std::clamp(42, -1, 1); // == 1
 std::clamp(-42, -1, 1); // == -1
@@ -589,16 +588,16 @@ std::clamp(0, -1, 1, std::less<>{}); // == 0
 ```
 
 ### std::reduce
-Fold over a given range of elements. Conceptually similar to `std::accumulate`, but `std::reduce` will perform the fold in parallel. Due to the fold being done in parallel, if you specify a binary operation, it is required to be associative and commutative. A given binary operation also should not change any element or invalidate any iterators within the given range.
+对给定范围内的元素进行折叠。概念上与 `std::accumulate` 类似，但 `std::reduce` 会并行地执行折叠。由于折叠是并行进行的，如果你指定了二元运算，它必须满足结合律和交换律。给定的二元运算也不应修改任何元素，或使给定范围内的任何迭代器失效。
 
-The default binary operation is std::plus with an initial value of 0.
+默认的二元运算是 std::plus，初始值为 0。
 ```c++
 const std::array<int, 3> a{ 1, 2, 3 };
 std::reduce(std::cbegin(a), std::cend(a)); // == 6
 // Using a custom binary op:
 std::reduce(std::cbegin(a), std::cend(a), 1, std::multiplies<>{}); // == 6
 ```
-Additionally you can specify transformations for reducers:
+此外，你还可以为归约器指定变换操作：
 ```c++
 std::transform_reduce(std::cbegin(a), std::cend(a), 0, std::plus<>{}, times_ten); // == 60
 
@@ -608,8 +607,8 @@ const auto product_times_ten = [](const auto a, const auto b) { return a * b * 1
 std::transform_reduce(std::cbegin(a), std::cend(a), std::cbegin(b), 0, std::plus<>{}, product_times_ten); // == 140
 ```
 
-### Prefix sum algorithms
-Support for prefix sums (both inclusive and exclusive scans) along with transformations.
+### 前缀和算法
+支持前缀和（包括包含式扫描和排除式扫描）以及相应的变换版本。
 ```c++
 const std::array<int, 3> a{ 1, 2, 3 };
 
@@ -628,8 +627,8 @@ std::transform_exclusive_scan(std::cbegin(a), std::cend(a),
     std::ostream_iterator<int>{ std::cout, " " }, 0, std::plus<>{}, times_ten); // 0 10 30
 ```
 
-### GCD and LCM
-Greatest common divisor (GCD) and least common multiple (LCM).
+### GCD 和 LCM
+最大公约数（GCD）和最小公倍数（LCM）。
 ```c++
 const int p = 9;
 const int q = 3;
@@ -638,7 +637,7 @@ std::lcm(p, q); // == 9
 ```
 
 ### std::not_fn
-Utility function that returns the negation of the result of the given function.
+返回给定函数结果取反的工具函数。
 ```c++
 const std::ostream_iterator<int> ostream_it{ std::cout, " " };
 const auto is_even = [](const auto n) { return n % 2 == 0; };
@@ -650,19 +649,19 @@ std::copy_if(std::cbegin(v), std::cend(v), ostream_it, is_even); // 0 2 4
 std::copy_if(std::cbegin(v), std::cend(v), ostream_it, std::not_fn(is_even)); // 1 3
 ```
 
-### String conversion to/from numbers
-Convert integrals and floats to a string or vice-versa. Conversions are non-throwing, do not allocate, and are more secure than the equivalents from the C standard library.
+### 字符串与数字之间的转换
+在字符串与整型/浮点型之间进行转换。这些转换不会抛出异常，不会分配内存，并且比 C 标准库中的等价函数更安全。
 
-Users are responsible for allocating enough storage required for `std::to_chars`, or the function will fail by setting the error code object in its return value.
+对于 `std::to_chars`，用户需要负责分配所需的足够存储空间，否则函数会失败并在其返回值中设置错误码对象。
 
-These functions allow you to optionally pass a base (defaults to base-10) or a format specifier for floating type input.
+这些函数允许你可选地传入一个进制（默认为十进制），或者为浮点类型输入传入一个格式说明符。
 
-* `std::to_chars` returns a (non-const) char pointer which is one-past-the-end of the string that the function wrote to inside the given buffer, and an error code object.
-* `std::from_chars` returns a const char pointer which on success is equal to the end pointer passed to the function, and an error code object.
+* `std::to_chars` 返回一个（非 const 的）char 指针，指向函数在给定缓冲区内写入的字符串末尾的下一个位置，以及一个错误码对象。
+* `std::from_chars` 返回一个 const char 指针，成功时它等于传给函数的结束指针，以及一个错误码对象。
 
-Both error code objects returned from these functions are equal to the default-initialized error code object on success.
+这两个函数返回的错误码对象在成功时都等于默认初始化的错误码对象。
 
-Convert the number `123` to a `std::string`:
+将数字 `123` 转换为 `std::string`：
 ```c++
 const int n = 123;
 
@@ -676,7 +675,7 @@ if (ec == std::errc{}) { std::cout << str << std::endl; } // 123
 else { /* handle failure */ }
 ```
 
-Convert from a `std::string` with value `"123"` to an integer:
+将值为 `"123"` 的 `std::string` 转换为整数：
 ```c++
 const std::string str{ "123" };
 int n;
@@ -687,8 +686,8 @@ if (ec == std::errc{}) { std::cout << n << std::endl; } // 123
 else { /* handle failure */ }
 ```
 
-### Rounding functions for chrono durations and timepoints
-Provides abs, round, ceil, and floor helper functions for `std::chrono::duration` and `std::chrono::time_point`.
+### 用于 chrono duration 和 timepoint 的取整函数
+为 `std::chrono::duration` 和 `std::chrono::time_point` 提供 abs、round、ceil 和 floor 辅助函数。
 ```c++
 std::chrono::milliseconds a{ -5500 };
 std::chrono::milliseconds d = std::chrono::abs(a); // == 5500ms
@@ -697,22 +696,22 @@ std::chrono::ceil<seconds>(d); // == 6s
 std::chrono::floor<seconds>(d); // == 5s
 ```
 
-## Acknowledgements
-* [cppreference](http://en.cppreference.com/w/cpp) - especially useful for finding examples and documentation of new library features.
-* [C++ Rvalue References Explained](http://web.archive.org/web/20240324121501/http://thbecker.net/articles/rvalue_references/section_01.html) - a great introduction I used to understand rvalue references, perfect forwarding, and move semantics.
-* [clang](http://clang.llvm.org/cxx_status.html) and [gcc](https://gcc.gnu.org/projects/cxx-status.html)'s standards support pages. Also included here are the proposals for language/library features that I used to help find a description of, what it's meant to fix, and some examples.
+## 致谢
+* [cppreference](http://en.cppreference.com/w/cpp) - 对查找新库特性的示例和文档特别有用。
+* [C++ Rvalue References Explained](http://web.archive.org/web/20240324121501/http://thbecker.net/articles/rvalue_references/section_01.html) - 我用来理解右值引用、完美转发和移动语义的优秀入门资料。
+* [clang](http://clang.llvm.org/cxx_status.html) 和 [gcc](https://gcc.gnu.org/projects/cxx-status.html) 的标准支持页面。其中还包含了语言/库特性的提案，我借助这些提案来了解相关特性的描述、它要解决的问题以及一些示例。
 * [Compiler explorer](https://godbolt.org/)
-* [Scott Meyers' Effective Modern C++](https://www.amazon.com/Effective-Modern-Specific-Ways-Improve/dp/1491903996) - highly recommended book!
-* [Jason Turner's C++ Weekly](https://www.youtube.com/channel/UCxHAlbZQNFU2LgEtiqd2Maw) - nice collection of C++-related videos.
+* [Scott Meyers 的《Effective Modern C++》](https://www.amazon.com/Effective-Modern-Specific-Ways-Improve/dp/1491903996) - 强烈推荐的书！
+* [Jason Turner 的 C++ Weekly](https://www.youtube.com/channel/UCxHAlbZQNFU2LgEtiqd2Maw) - 优秀的 C++ 相关视频合集。
 * [What can I do with a moved-from object?](http://stackoverflow.com/questions/7027523/what-can-i-do-with-a-moved-from-object)
 * [What are some uses of decltype(auto)?](http://stackoverflow.com/questions/24109737/what-are-some-uses-of-decltypeauto)
-* And many more SO posts I'm forgetting...
+* 以及许多我已经忘记的 Stack Overflow 帖子……
 
-## Author
+## 作者
 Anthony Calandra
 
-## Content Contributors
-See: https://github.com/AnthonyCalandra/modern-cpp-features/graphs/contributors
+## 内容贡献者
+参见：https://github.com/AnthonyCalandra/modern-cpp-features/graphs/contributors
 
-## License
+## 许可证
 MIT

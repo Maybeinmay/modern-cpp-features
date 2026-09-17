@@ -1,43 +1,43 @@
 # C++14
 
-## Overview
-Many of these descriptions and examples are taken from various resources (see [Acknowledgements](#acknowledgements) section) and summarized in my own words.
+## 概述
+本文中的许多描述和示例来自各种资源（参见 [致谢](#致谢) 部分），并由我用自己的话进行了总结。
 
-C++14 includes the following new language features:
-- [binary literals](#binary-literals)
-- [generic lambda expressions](#generic-lambda-expressions)
-- [lambda capture initializers](#lambda-capture-initializers)
-- [return type deduction](#return-type-deduction)
+C++14 包含以下新的语言特性：
+- [二进制字面量](#二进制字面量)
+- [泛型 lambda 表达式](#泛型-lambda-表达式)
+- [lambda 捕获初始化器](#lambda-捕获初始化器)
+- [返回类型推导](#返回类型推导)
 - [decltype(auto)](#decltypeauto)
-- [relaxing constraints on constexpr functions](#relaxing-constraints-on-constexpr-functions)
-- [variable templates](#variable-templates)
-- [\[\[deprecated\]\] attribute](#deprecated-attribute)
+- [放宽对 constexpr 函数的约束](#放宽对-constexpr-函数的约束)
+- [变量模板](#变量模板)
+- [\[\[deprecated\]\] 属性](#deprecated-属性)
 
-C++14 includes the following new library features:
-- [user-defined literals for standard library types](#user-defined-literals-for-standard-library-types)
-- [compile-time integer sequences](#compile-time-integer-sequences)
+C++14 包含以下新的库特性：
+- [标准库类型的用户定义字面量](#标准库类型的用户定义字面量)
+- [编译期整数序列](#编译期整数序列)
 - [std::make_unique](#stdmake_unique)
 
-## C++14 Language Features
+## C++14 语言特性
 
-### Binary literals
-Binary literals provide a convenient way to represent a base-2 number.
-It is possible to separate digits with `'`.
+### 二进制字面量
+二进制字面量提供了一种方便的方式来表示二进制数。
+可以用 `'` 分隔数字。
 ```c++
 0b110 // == 6
 0b1111'1111 // == 255
 ```
 
-### Generic lambda expressions
-C++14 now allows the `auto` type-specifier in the parameter list, enabling polymorphic lambdas.
+### 泛型 lambda 表达式
+C++14 现在允许在参数列表中使用 `auto` 类型说明符，从而支持多态 lambda。
 ```c++
 auto identity = [](auto x) { return x; };
 int three = identity(3); // == 3
 std::string foo = identity("foo"); // == "foo"
 ```
 
-### Lambda capture initializers
-This allows creating lambda captures initialized with arbitrary expressions. The name given to the captured value does not need to be related to any variables in the enclosing scopes and introduces a new name inside the lambda body. The initializing expression is evaluated when the lambda is _created_ (not when it is _invoked_).
+### lambda 捕获初始化器
+它允许创建用任意表达式初始化的 lambda 捕获。给被捕获值起的名字不必与外部作用域中的任何变量相关，它会在 lambda 函数体内部引入一个新名字。初始化表达式在 lambda 被*创建*时求值（而不是在其被*调用*时）。
 ```c++
 int factory(int i) { return i * 10; }
 auto f = [x = factory(2)] { return x; }; // returns 20
@@ -50,7 +50,7 @@ auto a = generator(); // == 0
 auto b = generator(); // == 1
 auto c = generator(); // == 2
 ```
-Because it is now possible to _move_ (or _forward_) values into a lambda that could previously be only captured by copy or reference we can now capture move-only types in a lambda by value. Note that in the below example the `p` in the capture-list of `task2` on the left-hand-side of `=` is a new variable private to the lambda body and does not refer to the original `p`.
+由于现在可以将值*移动*（或*转发*）到 lambda 中（而以前只能按复制或引用捕获），我们现在可以按值捕获仅可移动（move-only）的类型。注意，在下面的例子中，`task2` 的捕获列表中 `=` 左侧的 `p` 是一个仅属于 lambda 函数体的新变量，并不引用原来的 `p`。
 ```c++
 auto p = std::make_unique<int>(1);
 
@@ -59,7 +59,7 @@ auto task1 = [=] { *p = 5; }; // ERROR: std::unique_ptr cannot be copied
 auto task2 = [p = std::move(p)] { *p = 5; }; // OK: p is move-constructed into the closure object
 // the original p is empty after task2 is created
 ```
-Using this reference-captures can have different names than the referenced variable.
+使用这种方式，引用捕获可以与所引用的变量具有不同的名字。
 ```c++
 auto x = 1;
 auto f = [&r = x, x = x * 10] {
@@ -69,8 +69,8 @@ auto f = [&r = x, x = x * 10] {
 f(); // sets x to 2 and returns 12
 ```
 
-### Return type deduction
-Using an `auto` return type in C++14, the compiler will attempt to deduce the type for you. With lambdas, you can now deduce its return type using `auto`, which makes returning a deduced reference or rvalue reference possible.
+### 返回类型推导
+在 C++14 中使用 `auto` 返回类型，编译器会尝试为你推导类型。对于 lambda，现在可以使用 `auto` 推导其返回类型，这使得返回推导出的引用或右值引用成为可能。
 ```c++
 // Deduce return type as `int`.
 auto f(int i) {
@@ -90,7 +90,7 @@ int& z = g(y); // reference to `y`
 ```
 
 ### decltype(auto)
-The `decltype(auto)` type-specifier also deduces a type like `auto` does. However, it deduces return types while keeping their references and cv-qualifiers, while `auto` will not.
+`decltype(auto)` 类型说明符也会像 `auto` 一样推导类型。但是，它在推导返回类型时会保留引用和 cv 限定符，而 `auto` 则不会。
 ```c++
 const int x = 0;
 auto x1 = x; // int
@@ -122,10 +122,10 @@ static_assert(std::is_same<int, decltype(f(x))>::value == 1);
 static_assert(std::is_same<const int&, decltype(g(x))>::value == 1);
 ```
 
-See also: [`decltype (C++11)`](README.md#decltype).
+参见：[`decltype (C++11)`](README.md#decltype)。
 
-### Relaxing constraints on constexpr functions
-In C++11, `constexpr` function bodies could only contain a very limited set of syntaxes, including (but not limited to): `typedef`s, `using`s, and a single `return` statement. In C++14, the set of allowable syntaxes expands greatly to include the most common syntax such as `if` statements, multiple `return`s, loops, etc.
+### 放宽对 constexpr 函数的约束
+在 C++11 中，`constexpr` 函数体只能包含非常有限的语法，包括（但不限于）`typedef`、`using` 以及单条 `return` 语句。在 C++14 中，允许的语法范围大大扩展，包括了最常见的语法，如 `if` 语句、多个 `return`、循环等。
 ```c++
 constexpr int factorial(int n) {
   if (n <= 1) {
@@ -137,8 +137,8 @@ constexpr int factorial(int n) {
 factorial(5); // == 120
 ```
 
-### Variable templates
-C++14 allows variables to be templated:
+### 变量模板
+C++14 允许变量模板化：
 
 ```c++
 template<class T>
@@ -147,8 +147,8 @@ template<class T>
 constexpr T e  = T(2.7182818284590452353);
 ```
 
-### [[deprecated]] attribute
-C++14 introduces the `[[deprecated]]` attribute to indicate that a unit (function, class, etc.) is discouraged and likely yield compilation warnings. If a reason is provided, it will be included in the warnings.
+### [[deprecated]] 属性
+C++14 引入了 `[[deprecated]]` 属性，用于指示某个单元（函数、类等）已不推荐使用，并很可能产生编译警告。如果提供了原因，它会被包含在警告中。
 ```c++
 [[deprecated]]
 void old_method();
@@ -156,10 +156,10 @@ void old_method();
 void legacy_method();
 ```
 
-## C++14 Library Features
+## C++14 库特性
 
-### User-defined literals for standard library types
-New user-defined literals for standard library types, including new built-in literals for `chrono` and `basic_string`. These can be `constexpr` meaning they can be used at compile-time. Some uses for these literals include compile-time integer parsing, binary literals, and imaginary number literals.
+### 标准库类型的用户定义字面量
+为标准库类型新增了用户定义字面量，包括为 `chrono` 和 `basic_string` 新增的内置字面量。它们可以是 `constexpr`，即可以在编译期使用。这些字面量的一些用途包括编译期整数解析、二进制字面量以及虚数字面量。
 ```c++
 using namespace std::chrono_literals;
 auto day = 24h;
@@ -167,12 +167,12 @@ day.count(); // == 24
 std::chrono::duration_cast<std::chrono::minutes>(day).count(); // == 1440
 ```
 
-### Compile-time integer sequences
-The class template `std::integer_sequence` represents a compile-time sequence of integers. There are a few helpers built on top:
-* `std::make_integer_sequence<T, N>` - creates a sequence of `0, ..., N - 1` with type `T`.
-* `std::index_sequence_for<T...>` - converts a template parameter pack into an integer sequence.
+### 编译期整数序列
+类模板 `std::integer_sequence` 表示一个编译期的整数序列。在其之上构建了几个辅助工具：
+* `std::make_integer_sequence<T, N>` - 创建一个类型为 `T` 的 `0, ..., N - 1` 序列。
+* `std::index_sequence_for<T...>` - 将一个模板参数包转换为整数序列。
 
-Convert an array into a tuple:
+将数组转换为元组：
 ```c++
 template<typename Array, std::size_t... I>
 decltype(auto) a2t_impl(const Array& a, std::integer_sequence<std::size_t, I...>) {
@@ -186,36 +186,36 @@ decltype(auto) a2t(const std::array<T, N>& a) {
 ```
 
 ### std::make_unique
-`std::make_unique` is the recommended way to create instances of `std::unique_ptr`s due to the following reasons:
-* Avoid having to use the `new` operator.
-* Prevents code repetition when specifying the underlying type the pointer shall hold.
-* Most importantly, it provides exception-safety. Suppose we were calling a function `foo` like so:
+`std::make_unique` 是创建 `std::unique_ptr` 实例的推荐方式，原因如下：
+* 避免使用 `new` 运算符。
+* 在指定指针所持有的底层类型时，避免代码重复。
+* 最重要的是，它提供了异常安全性。假设我们像下面这样调用函数 `foo`：
 ```c++
 foo(std::unique_ptr<T>{new T{}}, function_that_throws(), std::unique_ptr<T>{new T{}});
 ```
-The compiler is free to call `new T{}`, then `function_that_throws()`, and so on... Since we have allocated data on the heap in the first construction of a `T`, we have introduced a leak here. With `std::make_unique`, we are given exception-safety:
+编译器可以自由地先调用 `new T{}`，再调用 `function_that_throws()`，等等……由于我们在第一次构造 `T` 时已经在堆上分配了数据，这里就引入了内存泄漏。使用 `std::make_unique`，我们就获得了异常安全性：
 ```c++
 foo(std::make_unique<T>(), function_that_throws(), std::make_unique<T>());
 ```
 
-See the section on [smart pointers (C++11)](README.md#smart-pointers) for more information on `std::unique_ptr` and `std::shared_ptr`.
+有关 `std::unique_ptr` 和 `std::shared_ptr` 的更多信息，参见 [智能指针（C++11）](README.md#smart-pointers) 部分。
 
-## Acknowledgements
-* [cppreference](http://en.cppreference.com/w/cpp) - especially useful for finding examples and documentation of new library features.
-* [C++ Rvalue References Explained](http://web.archive.org/web/20240324121501/http://thbecker.net/articles/rvalue_references/section_01.html) - a great introduction I used to understand rvalue references, perfect forwarding, and move semantics.
-* [clang](http://clang.llvm.org/cxx_status.html) and [gcc](https://gcc.gnu.org/projects/cxx-status.html)'s standards support pages. Also included here are the proposals for language/library features that I used to help find a description of, what it's meant to fix, and some examples.
+## 致谢
+* [cppreference](http://en.cppreference.com/w/cpp) - 对查找新库特性的示例和文档特别有用。
+* [C++ Rvalue References Explained](http://web.archive.org/web/20240324121501/http://thbecker.net/articles/rvalue_references/section_01.html) - 我用来理解右值引用、完美转发和移动语义的优秀入门资料。
+* [clang](http://clang.llvm.org/cxx_status.html) 和 [gcc](https://gcc.gnu.org/projects/cxx-status.html) 的标准支持页面。其中还包含了语言/库特性的提案，我借助这些提案来了解相关特性的描述、它要解决的问题以及一些示例。
 * [Compiler explorer](https://godbolt.org/)
-* [Scott Meyers' Effective Modern C++](https://www.amazon.com/Effective-Modern-Specific-Ways-Improve/dp/1491903996) - highly recommended book!
-* [Jason Turner's C++ Weekly](https://www.youtube.com/channel/UCxHAlbZQNFU2LgEtiqd2Maw) - nice collection of C++-related videos.
+* [Scott Meyers 的《Effective Modern C++》](https://www.amazon.com/Effective-Modern-Specific-Ways-Improve/dp/1491903996) - 强烈推荐的书！
+* [Jason Turner 的 C++ Weekly](https://www.youtube.com/channel/UCxHAlbZQNFU2LgEtiqd2Maw) - 优秀的 C++ 相关视频合集。
 * [What can I do with a moved-from object?](http://stackoverflow.com/questions/7027523/what-can-i-do-with-a-moved-from-object)
 * [What are some uses of decltype(auto)?](http://stackoverflow.com/questions/24109737/what-are-some-uses-of-decltypeauto)
-* And many more SO posts I'm forgetting...
+* 以及许多我已经忘记的 Stack Overflow 帖子……
 
-## Author
+## 作者
 Anthony Calandra
 
-## Content Contributors
-See: https://github.com/AnthonyCalandra/modern-cpp-features/graphs/contributors
+## 内容贡献者
+参见：https://github.com/AnthonyCalandra/modern-cpp-features/graphs/contributors
 
-## License
+## 许可证
 MIT
