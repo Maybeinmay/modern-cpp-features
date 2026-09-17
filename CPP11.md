@@ -71,21 +71,21 @@ C++11 引入了一种新的引用，称为*右值引用*。对 `T` 的右值引�
 
 左值和右值的类型推导：
 ```c++
-int x = 0; // `x` is an lvalue of type `int`
-int& xl = x; // `xl` is an lvalue of type `int&`
-int&& xr = x; // compiler error -- `x` is an lvalue
-int&& xr2 = 0; // `xr2` is an lvalue of type `int&&` -- binds to the rvalue temporary, `0`
+int x = 0; // `x` 是类型为 `int` 的左值
+int& xl = x; // `xl` 是类型为 `int&` 的左值
+int&& xr = x; // 编译错误 -- `x` 是左值
+int&& xr2 = 0; // `xr2` 是类型为 `int&&` 的左值 -- 绑定到右值临时对象 `0`
 
 void f(int& x) {}
 void f(int&& x) {}
 
-f(x);  // calls f(int&)
-f(xl); // calls f(int&)
-f(3);  // calls f(int&&)
-f(std::move(x)); // calls f(int&&)
+f(x);  // 调用 f(int&)
+f(xl); // 调用 f(int&)
+f(3);  // 调用 f(int&&)
+f(std::move(x)); // 调用 f(int&&)
 
-f(xr2);           // calls f(int&)
-f(std::move(xr2)); // calls f(int&& x)
+f(xr2);           // 调用 f(int&)
+f(std::move(xr2)); // 调用 f(int&& x)
 ```
 
 参见：[`std::move`](#stdmove)、[`std::forward`](#stdforward)、[`转发引用`](#转发引用)。
@@ -101,34 +101,34 @@ f(std::move(xr2)); // calls f(int&& x)
 
 `auto` 在左值和右值上的类型推导：
 ```c++
-int x = 0; // `x` is an lvalue of type `int`
-auto&& al = x; // `al` is an lvalue of type `int&` -- binds to the lvalue, `x`
-auto&& ar = 0; // `ar` is an lvalue of type `int&&` -- binds to the rvalue temporary, `0`
+int x = 0; // `x` 是类型为 `int` 的左值
+auto&& al = x; // `al` 是类型为 `int&` 的左值 -- 绑定到左值 `x`
+auto&& ar = 0; // `ar` 是类型为 `int&&` 的左值 -- 绑定到右值临时对象 `0`
 ```
 
 模板类型参数在左值和右值上的推导：
 ```c++
-// Since C++14 or later:
+// C++14 及以后：
 void f(auto&& t) {
   // ...
 }
 
-// Since C++11 or later:
+// C++11 及以后：
 template <typename T>
 void f(T&& t) {
   // ...
 }
 
 int x = 0;
-f(0); // T is int, deduces as f(int &&) => f(int&&)
-f(x); // T is int&, deduces as f(int& &&) => f(int&)
+f(0); // T 是 int，推导为 f(int &&) => f(int&&)
+f(x); // T 是 int&，推导为 f(int& &&) => f(int&)
 
 int& y = x;
-f(y); // T is int&, deduces as f(int& &&) => f(int&)
+f(y); // T 是 int&，推导为 f(int& &&) => f(int&)
 
-int&& z = 0; // NOTE: `z` is an lvalue with type `int&&`.
-f(z); // T is int&, deduces as f(int& &&) => f(int&)
-f(std::move(z)); // T is int, deduces as f(int &&) => f(int&&)
+int&& z = 0; // 注意：`z` 是类型为 `int&&` 的左值。
+f(z); // T 是 int&，推导为 f(int& &&) => f(int&)
+f(std::move(z)); // T 是 int，推导为 f(int &&) => f(int&&)
 ```
 
 参见：[`std::move`](#stdmove)、[`std::forward`](#stdforward)、[`右值引用`](#右值引用)。
@@ -195,15 +195,15 @@ auto&& f = b; // int&
 auto g = new auto(123); // int*
 const auto h = 1; // const int
 auto i = 1, j = 2, k = 3; // int, int, int
-auto l = 1, m = true, n = 1.61; // error -- `l` deduced to be int, `m` is bool
-auto o; // error -- `o` requires initializer
+auto l = 1, m = true, n = 1.61; // 错误 -- `l` 推导为 int，`m` 是 bool
+auto o; // 错误 -- `o` 需要初始化器
 ```
 
 对于可读性极为有用，尤其是面对复杂类型时：
 ```c++
 std::vector<int> v = ...;
 std::vector<int>::const_iterator cit = v.cbegin();
-// vs.
+// 对比
 auto cit = v.cbegin();
 ```
 
@@ -237,30 +237,30 @@ auto addX = [=](int y) { return x + y; };
 addX(1); // == 2
 
 auto getXRef = [&]() -> int& { return x; };
-getXRef(); // int& to `x`
+getXRef(); // 返回指向 `x` 的 int&
 ```
 默认情况下，按值捕获的内容不能在 lambda 内部修改，因为编译器生成的方法被标记为 `const`。`mutable` 关键字允许修改被捕获的变量。该关键字放在参数列表之后（即使参数列表为空，也必须写出）。
 ```c++
 int x = 1;
 
-auto f1 = [&x] { x = 2; }; // OK: x is a reference and modifies the original
+auto f1 = [&x] { x = 2; }; // 正确：x 是引用，会修改原始对象
 
-auto f2 = [x] { x = 2; }; // ERROR: the lambda can only perform const-operations on the captured value
-// vs.
-auto f3 = [x]() mutable { x = 2; }; // OK: the lambda can perform any operations on the captured value
+auto f2 = [x] { x = 2; }; // 错误：lambda 只能对捕获的值执行 const 操作
+// 对比
+auto f3 = [x]() mutable { x = 2; }; // 正确：lambda 可以对捕获的值执行任意操作
 ```
 
 ### decltype
 `decltype` 是一个运算符，它返回传给它的表达式的*声明类型*。如果 cv 限定符和引用是表达式的一部分，它们会被保留。`decltype` 的示例：
 ```c++
-int a = 1; // `a` is declared as type `int`
-decltype(a) b = a; // `decltype(a)` is `int`
-const int& c = a; // `c` is declared as type `const int&`
-decltype(c) d = a; // `decltype(c)` is `const int&`
-decltype(123) e = 123; // `decltype(123)` is `int`
-int&& f = 1; // `f` is declared as type `int&&`
-decltype(f) g = 1; // `decltype(f) is `int&&`
-decltype((a)) h = g; // `decltype((a))` is int&
+int a = 1; // `a` 声明为类型 `int`
+decltype(a) b = a; // `decltype(a)` 是 `int`
+const int& c = a; // `c` 声明为类型 `const int&`
+decltype(c) d = a; // `decltype(c)` 是 `const int&`
+decltype(123) e = 123; // `decltype(123)` 是 `int`
+int&& f = 1; // `f` 声明为类型 `int&&`
+decltype(f) g = 1; // `decltype(f) 是 `int&&`
+decltype((a)) h = g; // `decltype((a))` 是 int&
 ```
 ```c++
 template <typename X, typename Y>
@@ -288,16 +288,16 @@ C++11 引入了一种新的空指针类型，旨在替代 C 的 `NULL` 宏。`nu
 ```c++
 void foo(int);
 void foo(char*);
-foo(NULL); // error -- ambiguous
-foo(nullptr); // calls foo(char*)
+foo(NULL); // 错误 -- 有歧义
+foo(nullptr); // 调用 foo(char*)
 ```
 
 ### 强类型枚举
 类型安全的枚举，解决了 C 风格枚举的诸多问题，包括：隐式转换、无法指定底层类型、作用域污染。
 ```c++
-// Specifying underlying type as `unsigned int`
+// 指定底层类型为 `unsigned int`
 enum class Color : unsigned int { Red = 0xff0000, Green = 0xff00, Blue = 0xff };
-// `Red`/`Green` in `Alert` don't conflict with `Color`
+// `Alert` 中的 `Red`/`Green` 不会与 `Color` 冲突
 enum class Alert : bool { Red, Green };
 Color c = Color::Red;
 ```
@@ -305,7 +305,7 @@ Color c = Color::Red;
 ### 属性
 属性为 `__attribute__(...)`、`__declspec` 等提供了一种通用的语法。
 ```c++
-// `noreturn` attribute indicates `f` doesn't return.
+// `noreturn` 属性表示 `f` 不会返回。
 [[ noreturn ]] void f() {
   throw "error";
 }
@@ -333,7 +333,7 @@ int b = square2(2); // mov edi, 2
 `constexpr` 值是编译器能够在编译期求值的值，但并不保证一定在编译期求值：
 ```c++
 const int x = 123;
-constexpr const int& y = x; // error -- constexpr variable `y` must be initialized by a constant expression
+constexpr const int& y = x; // 错误 -- constexpr 变量 `y` 必须由常量表达式初始化
 ```
 
 带类的常量表达式：
@@ -369,7 +369,7 @@ foo.foo; // == 0
 
 将摄氏度转换为华氏度：
 ```c++
-// `unsigned long long` parameter required for integer literal.
+// 整型字面量需要 `unsigned long long` 参数。
 long long operator "" _celsius(unsigned long long tempCelsius) {
   return std::llround(tempCelsius * 1.8 + 32);
 }
@@ -378,12 +378,12 @@ long long operator "" _celsius(unsigned long long tempCelsius) {
 
 字符串转整数：
 ```c++
-// `const char*` and `std::size_t` required as parameters.
+// 参数需要 `const char*` 和 `std::size_t`。
 int operator "" _int(const char* str, std::size_t) {
   return std::stoi(str);
 }
 
-"123"_int; // == 123, with type `int`
+"123"_int; // == 123，类型为 `int`
 ```
 
 ### 显式虚函数覆盖
@@ -395,9 +395,9 @@ struct A {
 };
 
 struct B : A {
-  void foo() override; // correct -- B::foo overrides A::foo
-  void bar() override; // error -- A::bar is not virtual
-  void baz() override; // error -- B::baz does not override A::baz
+  void foo() override; // 正确 -- B::foo 覆盖了 A::foo
+  void bar() override; // 错误 -- A::bar 不是虚函数
+  void baz() override; // 错误 -- B::baz 没有覆盖 A::baz
 };
 ```
 
@@ -413,14 +413,14 @@ struct B : A {
 };
 
 struct C : B {
-  virtual void foo(); // error -- declaration of 'foo' overrides a 'final' function
+  virtual void foo(); // 错误 -- 'foo' 的声明覆盖了一个 'final' 函数
 };
 ```
 
 类不能被继承。
 ```c++
 struct A final {};
-struct B : A {}; // error -- base 'A' is marked 'final'
+struct B : A {}; // 错误 -- 基类 'A' 被标记为 'final'
 ```
 
 ### 默认函数
@@ -443,7 +443,7 @@ struct B {
 };
 
 struct C : B {
-  // Calls B::B
+  // 调用 B::B
   C() = default;
 };
 
@@ -463,8 +463,8 @@ public:
 };
 
 A x {123};
-A y = x; // error -- call to deleted copy constructor
-y = x; // error -- operator= deleted
+A y = x; // 错误 -- 调用了被删除的拷贝构造函数
+y = x; // 错误 -- operator= 已被删除
 ```
 
 ### 基于范围的 for 循环
@@ -500,11 +500,11 @@ A f(A a) {
   return a;
 }
 
-A a1 = f(A{}); // move-constructed from rvalue temporary
-A a2 = std::move(a1); // move-constructed using std::move
+A a1 = f(A{}); // 从右值临时对象移动构造
+A a2 = std::move(a1); // 使用 std::move 移动构造
 A a3 = A{};
-a2 = std::move(a3); // move-assignment using std::move
-a1 = f(A{}); // move-assignment from rvalue temporary
+a2 = std::move(a3); // 使用 std::move 移动赋值
+a1 = f(A{}); // 从右值临时对象移动赋值
 ```
 
 ### 转换构造函数
@@ -516,10 +516,10 @@ struct A {
   A(int, int, int) {}
 };
 
-A a {0, 0}; // calls A::A(int, int)
-A b(0, 0); // calls A::A(int, int)
-A c = {0, 0}; // calls A::A(int, int)
-A d {0, 0, 0}; // calls A::A(int, int, int)
+A a {0, 0}; // 调用 A::A(int, int)
+A b(0, 0); // 调用 A::A(int, int)
+A c = {0, 0}; // 调用 A::A(int, int)
+A d {0, 0, 0}; // 调用 A::A(int, int, int)
 ```
 
 注意，花括号列表语法不允许窄化转换：
@@ -528,8 +528,8 @@ struct A {
   A(int) {}
 };
 
-A a(1.1); // OK
-A b {1.1}; // Error narrowing conversion from double to int
+A a(1.1); // 正确
+A b {1.1}; // 错误：从 double 到 int 的窄化转换
 ```
 
 注意，如果某个构造函数接受 `std::initializer_list`，那么它会被优先调用：
@@ -541,10 +541,10 @@ struct A {
   A(std::initializer_list<int>) {}
 };
 
-A a {0, 0}; // calls A::A(std::initializer_list<int>)
-A b(0, 0); // calls A::A(int, int)
-A c = {0, 0}; // calls A::A(std::initializer_list<int>)
-A d {0, 0, 0}; // calls A::A(std::initializer_list<int>)
+A a {0, 0}; // 调用 A::A(std::initializer_list<int>)
+A b(0, 0); // 调用 A::A(int, int)
+A c = {0, 0}; // 调用 A::A(std::initializer_list<int>)
+A d {0, 0, 0}; // 调用 A::A(std::initializer_list<int>)
 ```
 
 ### 显式转换函数
@@ -559,12 +559,12 @@ struct B {
 };
 
 A a;
-if (a); // OK calls A::operator bool()
-bool ba = a; // OK copy-initialization selects A::operator bool()
+if (a); // 正确，调用 A::operator bool()
+bool ba = a; // 正确，拷贝初始化选择 A::operator bool()
 
 B b;
-if (b); // OK calls B::operator bool()
-bool bb = b; // error copy-initialization does not consider B::operator bool()
+if (b); // 正确，调用 B::operator bool()
+bool bb = b; // 错误：拷贝初始化不考虑 B::operator bool()
 ```
 ### 内联命名空间
 内联命名空间的所有成员都被当作其父命名空间的成员一样对待，这允许对函数进行特化，并简化了版本管理的过程。这是一个传递性质：如果 A 包含 B，B 又包含 C，且 B 和 C 都是内联命名空间，那么 C 的成员就可以像在 A 中一样使用。
@@ -580,22 +580,22 @@ namespace Program {
   }
 }
 
-int version {Program::getVersion()};              // Uses getVersion() from Version2
-int oldVersion {Program::Version1::getVersion()}; // Uses getVersion() from Version1
-bool firstVersion {Program::isFirstVersion()};    // Does not compile when Version2 is added
+int version {Program::getVersion()};              // 使用 Version2 中的 getVersion()
+int oldVersion {Program::Version1::getVersion()}; // 使用 Version1 中的 getVersion()
+bool firstVersion {Program::isFirstVersion()};    // 添加 Version2 后无法编译
 ```
 
 ### 非静态数据成员初始化器
 允许非静态数据成员在声明处进行初始化，从而有可能清理掉构造函数中的默认初始化代码。
 
 ```c++
-// Default initialization prior to C++11
+// C++11 之前的默认初始化
 class Human {
     Human() : age{0} {}
   private:
     unsigned age;
 };
-// Default initialization on C++11
+// C++11 的默认初始化
 class Human {
   private:
     unsigned age {0};
@@ -628,14 +628,14 @@ private:
 };
 
 Foo foo{};
-Bar bar = foo.getBar(); // calls `Bar& getBar() &`
+Bar bar = foo.getBar(); // 调用 `Bar& getBar() &`
 
 const Foo foo2{};
-Bar bar2 = foo2.getBar(); // calls `Bar& Foo::getBar() const&`
+Bar bar2 = foo2.getBar(); // 调用 `Bar& Foo::getBar() const&`
 
-Foo{}.getBar(); // calls `Bar&& Foo::getBar() &&`
-std::move(foo).getBar(); // calls `Bar&& Foo::getBar() &&`
-std::move(foo2).getBar(); // calls `const Bar&& Foo::getBar() const&`
+Foo{}.getBar(); // 调用 `Bar&& Foo::getBar() &&`
+std::move(foo).getBar(); // 调用 `Bar&& Foo::getBar() &&`
+std::move(foo2).getBar(); // 调用 `const Bar&& Foo::getBar() const&`
 ```
 
 ### 尾置返回类型
@@ -644,7 +644,7 @@ C++11 允许函数和 lambda 使用另一种语法来指定返回类型。
 int f() {
   return 123;
 }
-// vs.
+// 对比
 auto f() -> int {
   return 123;
 }
@@ -656,13 +656,13 @@ auto g = []() -> int {
 ```
 当某些返回类型无法被解析时，这个特性特别有用：
 ```c++
-// NOTE: This does not compile!
+// 注意：这无法编译！
 template <typename T, typename U>
 decltype(a + b) add(T a, U b) {
     return a + b;
 }
 
-// Trailing return types allows this:
+// 尾置返回类型可以实现这一点：
 template <typename T, typename U>
 auto add(T a, U b) -> decltype(a + b) {
     return a + b;
@@ -674,20 +674,20 @@ auto add(T a, U b) -> decltype(a + b) {
 `noexcept` 说明符指定函数是否可能抛出异常。它是 `throw()` 的改进版本。
 
 ```c++
-void func1() noexcept;        // does not throw
-void func2() noexcept(true);  // does not throw
-void func3() throw();         // does not throw
+void func1() noexcept;        // 不抛出异常
+void func2() noexcept(true);  // 不抛出异常
+void func3() throw();         // 不抛出异常
 
-void func4() noexcept(false); // may throw
+void func4() noexcept(false); // 可能抛出异常
 ```
 
 不抛异常的函数允许调用可能抛异常的函数。每当有异常抛出，而处理程序的查找遇到不抛异常函数的最外层块时，就会调用函数 std::terminate。
 
 ```c++
-extern void f();  // potentially-throwing
+extern void f();  // 可能抛出异常
 void g() noexcept {
-    f();          // valid, even if f throws
-    throw 42;     // valid, effectively a call to std::terminate
+    f();          // 有效，即使 f 抛出异常
+    throw 42;     // 有效，实际上是调用 std::terminate
 }
 ```
 
@@ -711,7 +711,7 @@ R"delimiter(raw_characters)delimiter"
 
 示例：
 ```cpp
-// msg1 and msg2 are equivalent.
+// msg1 和 msg2 是等价的。
 const char* msg1 = "\nHello,\n\tworld!\n";
 const char* msg2 = R"(
 Hello,
@@ -734,10 +734,10 @@ typename remove_reference<T>::type&& move(T&& arg) {
 
 转移 `std::unique_ptr`：
 ```c++
-std::unique_ptr<int> p1 {new int{0}};  // in practice, use std::make_unique
-std::unique_ptr<int> p2 = p1; // error -- cannot copy unique pointers
-std::unique_ptr<int> p3 = std::move(p1); // move `p1` into `p3`
-                                         // now unsafe to dereference object held by `p1`
+std::unique_ptr<int> p1 {new int{0}};  // 实践中应使用 std::make_unique
+std::unique_ptr<int> p2 = p1; // 错误 -- 无法拷贝 unique 指针
+std::unique_ptr<int> p3 = std::move(p1); // 把 `p1` 移动进 `p3`
+                                         // 现在解引用 `p1` 持有的对象是不安全的
 ```
 
 ### std::forward
@@ -764,10 +764,10 @@ A wrapper(T&& arg) {
   return A{std::forward<T>(arg)};
 }
 
-wrapper(A{}); // moved
+wrapper(A{}); // 输出：moved
 A a;
-wrapper(a); // copied
-wrapper(std::move(a)); // moved
+wrapper(a); // 输出：copied
+wrapper(std::move(a)); // 输出：moved
 ```
 
 参见：[`转发引用`](#转发引用)、[`右值引用`](#右值引用)。
@@ -776,15 +776,15 @@ wrapper(std::move(a)); // moved
 `std::thread` 库提供了一种控制线程的标准方式，例如创建和终止线程。在下面的例子中，创建了多个线程来执行不同的计算，然后程序等待它们全部结束。
 
 ```c++
-void foo(bool clause) { /* do something... */ }
+void foo(bool clause) { /* 做一些事情... */ }
 
 std::vector<std::thread> threadsVector;
 threadsVector.emplace_back([]() {
-  // Lambda function that will be invoked
+  // 将被调用的 lambda 函数
 });
-threadsVector.emplace_back(foo, true);  // thread will run foo(true)
+threadsVector.emplace_back(foo, true);  // 线程将运行 foo(true)
 for (auto& thread : threadsVector) {
-  thread.join(); // Wait for threads to finish
+  thread.join(); // 等待线程结束
 }
 ```
 
@@ -808,40 +808,40 @@ C++11 引入了新的智能指针：`std::unique_ptr`、`std::shared_ptr`、`std
 
 `std::unique_ptr` 是一个不可复制、可移动的指针，它管理自己堆分配的内存。**注意：优先使用 `std::make_X` 辅助函数，而不是直接使用构造函数。参见 [std::make_unique](https://github.com/AnthonyCalandra/modern-cpp-features/blob/master/CPP14.md#stdmake_unique) 和 [std::make_shared](#stdmake_shared) 两节。**
 ```c++
-std::unique_ptr<Foo> p1 { new Foo{} };  // `p1` owns `Foo`
+std::unique_ptr<Foo> p1 { new Foo{} };  // `p1` 拥有 `Foo`
 if (p1) {
   p1->bar();
 }
 
 {
-  std::unique_ptr<Foo> p2 {std::move(p1)};  // Now `p2` owns `Foo`
+  std::unique_ptr<Foo> p2 {std::move(p1)};  // 现在 `p2` 拥有 `Foo`
   f(*p2);
 
-  p1 = std::move(p2);  // Ownership returns to `p1` -- `p2` gets destroyed
+  p1 = std::move(p2);  // 所有权回到 `p1` -- `p2` 被销毁
 }
 
 if (p1) {
   p1->bar();
 }
-// `Foo` instance is destroyed when `p1` goes out of scope
+// 当 `p1` 离开作用域时，`Foo` 实例被销毁
 ```
 
 `std::shared_ptr` 是一种智能指针，它管理被多个所有者共享的资源。共享指针持有一个*控制块*，其中包含若干组成部分，例如被管理的对象和一个引用计数器。所有对控制块的访问都是线程安全的，但是对被管理对象本身的操作*不是*线程安全的。
 ```c++
 void foo(std::shared_ptr<T> t) {
-  // Do something with `t`...
+  // 对 `t` 做一些事情...
 }
 
 void bar(std::shared_ptr<T> t) {
-  // Do something with `t`...
+  // 对 `t` 做一些事情...
 }
 
 void baz(std::shared_ptr<T> t) {
-  // Do something with `t`...
+  // 对 `t` 做一些事情...
 }
 
 std::shared_ptr<T> p1 {new T{}};
-// Perhaps these take place in another threads?
+// 也许这些发生在其他线程中？
 foo(p1);
 bar(p1);
 baz(p1);
@@ -852,17 +852,17 @@ chrono 库包含一组用于处理*时长*（durations）、*时钟*（clocks）
 ```c++
 std::chrono::time_point<std::chrono::steady_clock> start, end;
 start = std::chrono::steady_clock::now();
-// Some computations...
+// 一些计算...
 end = std::chrono::steady_clock::now();
 
 std::chrono::duration<double> elapsed_seconds = end - start;
-double t = elapsed_seconds.count(); // t number of seconds, represented as a `double`
+double t = elapsed_seconds.count(); // t 表示秒数，类型为 `double`
 ```
 
 ### 元组
 元组是固定大小的异构值集合。可以通过使用 [`std::tie`](#stdtie) 解包，或者使用 `std::get` 来访问 `std::tuple` 的元素。
 ```c++
-// `playerProfile` has type `std::tuple<int, const char*, const char*>`.
+// `playerProfile` 的类型是 `std::tuple<int, const char*, const char*>`。
 auto playerProfile = std::make_tuple(51, "Frans Nielsen", "NYI");
 std::get<0>(playerProfile); // 51
 std::get<1>(playerProfile); // "Frans Nielsen"
@@ -872,11 +872,11 @@ std::get<2>(playerProfile); // "NYI"
 ### std::tie
 创建一个左值引用的元组。对于解包 `std::pair` 和 `std::tuple` 对象很有用。使用 `std::ignore` 作为被忽略值的占位符。在 C++17 中，应该改用结构化绑定。
 ```c++
-// With tuples...
+// 使用元组...
 std::string playerName;
 std::tie(std::ignore, playerName, std::ignore) = std::make_tuple(91, "John Tavares", "NYI");
 
-// With pairs...
+// 使用 pair...
 std::string yes, no;
 std::tie(yes, no) = std::make_pair("yes", "no");
 ```
@@ -916,17 +916,17 @@ foo(std::make_shared<T>(), function_that_throws(), std::make_shared<T>());
 `std::ref(val)` 用于创建持有 val 引用的 `std::reference_wrapper` 类型对象。适用于使用 `&` 进行常规引用传递无法通过编译，或者 `&` 因类型推导而被丢弃的情况。`std::cref` 类似，但它创建的引用包装器持有对 val 的常量引用。
 
 ```c++
-// create a container to store reference of objects.
+// 创建一个容器来存储对象的引用。
 auto val = 99;
 auto _ref = std::ref(val);
 _ref++;
 auto _cref = std::cref(val);
-//_cref++; does not compile
-std::vector<std::reference_wrapper<int>>vec; // vector<int&>vec does not compile
-vec.push_back(_ref); // vec.push_back(&i) does not compile
-cout << val << endl; // prints 100
-cout << vec[0] << endl; // prints 100
-cout << _cref; // prints 100
+//_cref++; 无法编译
+std::vector<std::reference_wrapper<int>>vec; // vector<int&>vec 无法编译
+vec.push_back(_ref); // vec.push_back(&i) 无法编译
+cout << val << endl; // 输出 100
+cout << vec[0] << endl; // 输出 100
+cout << _cref; // 输出 100
 ```
 
 ### 内存模型
@@ -944,12 +944,12 @@ C++11 为 C++ 引入了内存模型，这意味着对线程和原子操作的库
 
 ```c++
 int foo() {
-  /* Do something here, then return the result. */
+  /* 在这里做一些事情，然后返回结果。 */
   return 1000;
 }
 
-auto handle = std::async(std::launch::async, foo);  // create an async task
-auto result = handle.get();  // wait for the result
+auto handle = std::async(std::launch::async, foo);  // 创建一个异步任务
+auto result = handle.get();  // 等待结果
 ```
 
 ### std::begin/end

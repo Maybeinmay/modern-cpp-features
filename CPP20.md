@@ -59,7 +59,7 @@ generator<int> range(int start, int end) {
     start++;
   }
 
-  // Implicit co_return at the end of this function:
+  // 在此函数末尾隐式执行 co_return：
   // co_return;
 }
 
@@ -77,7 +77,7 @@ task<void> echo(socket s) {
     co_await async_write(s, data);
   }
 
-  // Implicit co_return at the end of this function:
+  // 在此函数末尾隐式执行 co_return：
   // co_return;
 }
 ```
@@ -102,64 +102,64 @@ concept concept-name = constraint-expression;
 ```
 其中 `constraint-expression` 求值为一个 constexpr 布尔值。*约束*应当表达语义上的要求，例如某个类型是否是数值类型或是否可哈希。如果给定类型不满足它所绑定的概念（即 `constraint-expression` 返回 `false`），就会产生编译错误。由于约束是在编译期求值的，它们可以提供更有意义的错误信息和运行时安全性。
 ```c++
-// `T` is not limited by any constraints.
+// `T` 不受任何约束限制。
 template <typename T>
 concept always_satisfied = true;
-// Limit `T` to integrals.
+// 把 `T` 限制为整型。
 template <typename T>
 concept integral = std::is_integral_v<T>;
-// Limit `T` to both the `integral` constraint and signedness.
+// 把 `T` 同时限制为 `integral` 约束和有符号性。
 template <typename T>
 concept signed_integral = integral<T> && std::is_signed_v<T>;
-// Limit `T` to both the `integral` constraint and the negation of the `signed_integral` constraint.
+// 把 `T` 同时限制为 `integral` 约束和 `signed_integral` 约束的否定。
 template <typename T>
 concept unsigned_integral = integral<T> && !signed_integral<T>;
 ```
 有多种语法形式可以用来施加概念约束：
 ```c++
-// Forms for function parameters:
-// `T` is a constrained type template parameter.
+// 函数参数的形式：
+// `T` 是一个受约束的类型模板参数。
 template <my_concept T>
 void f(T v);
 
-// `T` is a constrained type template parameter.
+// `T` 是一个受约束的类型模板参数。
 template <typename T>
   requires my_concept<T>
 void f(T v);
 
-// `T` is a constrained type template parameter.
+// `T` 是一个受约束的类型模板参数。
 template <typename T>
 void f(T v) requires my_concept<T>;
 
-// `v` is a constrained deduced parameter.
+// `v` 是一个受约束的推导参数。
 void f(my_concept auto v);
 
-// `v` is a constrained non-type template parameter.
+// `v` 是一个受约束的非类型模板参数。
 template <my_concept auto v>
 void g();
 
-// Forms for auto-deduced variables:
-// `foo` is a constrained auto-deduced value.
+// auto 推导变量的形式：
+// `foo` 是一个受约束的 auto 推导值。
 my_concept auto foo = ...;
 
-// Forms for lambdas:
-// `T` is a constrained type template parameter.
+// lambda 的形式：
+// `T` 是一个受约束的类型模板参数。
 auto f = []<my_concept T> (T v) {
   // ...
 };
-// `T` is a constrained type template parameter.
+// `T` 是一个受约束的类型模板参数。
 auto f = []<typename T> requires my_concept<T> (T v) {
   // ...
 };
-// `T` is a constrained type template parameter.
+// `T` 是一个受约束的类型模板参数。
 auto f = []<typename T> (T v) requires my_concept<T> {
   // ...
 };
-// `v` is a constrained deduced parameter.
+// `v` 是一个受约束的推导参数。
 auto f = [](my_concept auto v) {
   // ...
 };
-// `v` is a constrained non-type template parameter.
+// `v` 是一个受约束的非类型模板参数。
 auto g = []<my_concept auto v> () {
   // ...
 };
@@ -167,14 +167,14 @@ auto g = []<my_concept auto v> () {
 `requires` 关键字用于开始一个 `requires` 子句或一个 `requires` 表达式：
 ```c++
 template <typename T>
-  requires my_concept<T> // `requires` clause.
+  requires my_concept<T> // `requires` 子句。
 void f(T);
 
 template <typename T>
-concept callable = requires (T f) { f(); }; // `requires` expression.
+concept callable = requires (T f) { f(); }; // `requires` 表达式。
 
 template <typename T>
-  requires requires (T x) { x + x; } // `requires` clause and expression on same line.
+  requires requires (T x) { x + x; } // `requires` 子句和表达式在同一行。
 T add(T a, T b) {
   return a + b;
 }
@@ -204,7 +204,7 @@ struct baz {
   value data;
 };
 
-// Using SFINAE, enable if `T` is a `baz`.
+// 使用 SFINAE，在 `T` 是 `baz` 时启用。
 template <typename T, typename = std::enable_if_t<std::is_same_v<T, baz>>>
 struct S {};
 
@@ -213,27 +213,27 @@ using Ref = T&;
 
 template <typename T>
 concept C = requires {
-                     // Requirements on type `T`:
-  typename T::value; // A) has an inner member named `value`
-  typename S<T>;     // B) must have a valid class template specialization for `S`
-  typename Ref<T>;   // C) must be a valid alias template substitution
+                     // 对类型 `T` 的要求：
+  typename T::value; // A) 有一个名为 `value` 的内部成员
+  typename S<T>;     // B) 必须有一个对 `S` 合法的类模板特化
+  typename Ref<T>;   // C) 必须是一次合法的别名模板替换
 };
 
 template <C T>
 void g(T a);
 
-g(foo{}); // ERROR: Fails requirement A.
-g(bar{}); // ERROR: Fails requirement B.
-g(baz{}); // PASS.
+g(foo{}); // 错误：不满足要求 A。
+g(bar{}); // 错误：不满足要求 B。
+g(baz{}); // 通过。
 ```
 * **复合要求** - 花括号中的表达式，后跟一个尾置返回类型或类型约束。
 
 ```c++
 template <typename T>
 concept C = requires(T x) {
-  {*x} -> std::convertible_to<typename T::inner>; // the type of the expression `*x` is convertible to `T::inner`
-  {x + 1} -> std::same_as<int>; // the expression `x + 1` satisfies `std::same_as<decltype((x + 1))>`
-  {x * 1} -> std::convertible_to<T>; // the type of the expression `x * 1` is convertible to `T`
+  {*x} -> std::convertible_to<typename T::inner>; // 表达式 `*x` 的类型可转换为 `T::inner`
+  {x + 1} -> std::same_as<int>; // 表达式 `x + 1` 满足 `std::same_as<decltype((x + 1))>`
+  {x * 1} -> std::convertible_to<T>; // 表达式 `x * 1` 的类型可转换为 `T`
 };
 ```
 * **嵌套要求** - 由 `requires` 关键字表示，用于指定附加约束（例如对局部参数实参的约束）。
@@ -261,7 +261,7 @@ struct foo {
   bool b;
   char c;
 
-  // Compare `a` first, then `b`, then `c` ...
+  // 先比较 `a`，再比较 `b`，然后比较 `c` ...
   friend auto operator<=>(const foo&) const = default;
 };
 
@@ -315,7 +315,7 @@ auto f = []<typename T>(std::vector<T> v) {
 for (auto v = std::vector{1, 2, 3}; auto& e : v) {
   std::cout << e;
 }
-// prints "123"
+// 打印 "123"
 ```
 
 ### \[\[likely\]\] 和 \[\[unlikely\]\] 属性
@@ -326,8 +326,8 @@ case 1:
   // ...
   break;
 
-[[likely]] case 2:  // n == 2 is considered to be arbitrarily more
-  // ...            // likely than any other value of n
+[[likely]] case 2:  // 认为 n == 2 比 n 的任何其他值
+  // ...            // 都更可能
   break;
 }
 ```
@@ -336,7 +336,7 @@ case 1:
 ```c++
 int random = get_random_number_between_x_and_y(0, 3);
 if (random > 0) [[likely]] {
-  // body of if statement
+  // if 语句的主体
   // ...
 }
 ```
@@ -344,7 +344,7 @@ if (random > 0) [[likely]] {
 它也可以应用于迭代语句的复合语句（函数体）。
 ```c++
 while (unlikely_truthy_condition) [[unlikely]] {
-  // body of while statement
+  // while 语句的主体
   // ...
 }
 ```
@@ -355,10 +355,10 @@ while (unlikely_truthy_condition) [[unlikely]] {
 struct int_value {
   int n = 0;
   auto getter_fn() {
-    // BAD:
+    // 差：
     // return [=]() { return n; };
 
-    // GOOD:
+    // 好：
     return [=, *this]() { return n; };
   }
 };
@@ -377,7 +377,7 @@ auto get_foo() {
   return f;
 }
 
-get_foo(); // uses implicit constructor
+get_foo(); // 使用隐式构造函数
 get_foo<foo{123}>();
 ```
 
@@ -408,14 +408,14 @@ x4.f(); // == 4
 在编译期有条件地选择构造函数是否为 explicit。`explicit(true)` 等同于直接指定 `explicit`。
 ```c++
 struct foo {
-  // Specify non-integral types (strings, floats, etc.) require explicit construction.
+  // 指定非整型类型（字符串、浮点数等）需要显式构造。
   template <typename T>
   explicit(!std::is_integral_v<T>) foo(T) {}
 };
 
-foo a = 123; // OK
-foo b = "123"; // ERROR: explicit constructor is not a candidate (explicit specifier evaluates to true)
-foo c {"123"}; // OK
+foo a = 123; // 正确
+foo b = "123"; // 错误：explicit 构造函数不是候选（explicit 说明符求值为 true）
+foo c {"123"}; // 正确
 ```
 
 ### 立即函数
@@ -425,10 +425,10 @@ consteval int sqr(int n) {
   return n * n;
 }
 
-constexpr int r = sqr(100); // OK
+constexpr int r = sqr(100); // 正确
 int x = 100;
-int r2 = sqr(x); // ERROR: the value of 'x' is not usable in a constant expression
-                 // OK if `sqr` were a `constexpr` function
+int r2 = sqr(x); // 错误：'x' 的值不能用于常量表达式
+                 // 如果 `sqr` 是 `constexpr` 函数则可以
 ```
 
 ### using enum
@@ -465,7 +465,7 @@ std::string_view to_string(rgba_color_channel my_channel) {
 ```c++
 template <typename... Args>
 auto f(Args&&... args){
-    // BY VALUE:
+    // 按值：
     return [...args = std::forward<Args>(args)] {
         // ...
     };
@@ -475,7 +475,7 @@ auto f(Args&&... args){
 ```c++
 template <typename... Args>
 auto f(Args&&... args){
-    // BY REFERENCE:
+    // 按引用：
     return [&...args = std::forward<Args>(args)] {
         // ...
     };
@@ -494,16 +494,16 @@ char8_t utf8_str[] = u8"\u0123";
 const char* g() { return "dynamic initialization"; }
 constexpr const char* f() { return "constant initializer"; }
 
-constinit const char* c = f();  // OK
-constinit const char* d = g();  // ERROR: `g` is not constexpr, so `d` cannot be evaluated at compile-time.
+constinit const char* c = f();  // 正确
+constinit const char* d = g();  // 错误：`g` 不是 constexpr，因此 `d` 无法在编译期求值。
 ```
 
 ### `__VA_OPT__`
 通过在被展开时求值为给定实参（当可变参数宏非空时）来帮助支持可变参数宏。
 ```c++
 #define F(...) f(0 __VA_OPT__(,) __VA_ARGS__)
-F(a, b, c) // replaced by f(0, a, b, c)
-F()        // replaced by f(0)
+F(a, b, c) // 被替换为 f(0, a, b, c)
+F()        // 被替换为 f(0)
 ```
 
 ## C++20 库特性
@@ -514,9 +514,9 @@ F()        // replaced by f(0)
 `std::format` 接收一个格式字符串作为第一个参数，其后是数量可变的参数。如果格式化失败，编译就会失败：
 
 ```cpp
-std::format("{}", 123); // OK -- returns "123"
-std::format("{} {}", 123); // ERROR -- not enough arguments
-std::format("{} {}", "Here's a number:", 123); // OK
+std::format("{}", 123); // 正确 -- 返回 "123"
+std::format("{} {}", 123); // 错误 -- 参数不足
+std::format("{} {}", "Here's a number:", 123); // 正确
 ```
 
 基于运行时创建的格式器来格式化字符串：
@@ -525,7 +525,7 @@ std::format("{} {}", "Here's a number:", 123); // OK
 std::string fmt = "{} {}";
 fmt += "{}{}";
 std::vformat(fmt, std::make_format_args("Here's a number:", 1, 2, 3));
-// OK -- returns "Here's a number: 123"
+// 正确 -- 返回 "Here's a number: 123"
 ```
 
 当格式化失败时（例如格式字符串非法），`std::vformat` 会抛出 `std::format_error`。
@@ -606,7 +606,7 @@ print_ints(std::array<int, 5>{ 1, 2, 3, 4, 5 });
 
 int a[10] = { 0 };
 print_ints(a);
-// etc.
+// 等等
 ```
 
 示例：静态大小的 span 对于 extent 不匹配的容器会编译失败。
@@ -617,18 +617,18 @@ void print_three_ints(std::span<const int, 3> ints) {
     }
 }
 
-print_three_ints(std::vector{ 1, 2, 3 }); // ERROR
-print_three_ints(std::array<int, 5>{ 1, 2, 3, 4, 5 }); // ERROR
+print_three_ints(std::vector{ 1, 2, 3 }); // 错误
+print_three_ints(std::array<int, 5>{ 1, 2, 3, 4, 5 }); // 错误
 int a[10] = { 0 };
-print_three_ints(a); // ERROR
+print_three_ints(a); // 错误
 
 std::array<int, 3> b = { 1, 2, 3 };
-print_three_ints(b); // OK
+print_three_ints(b); // 正确
 
-// You can construct a span manually if required:
+// 如果需要，你也可以手动构造 span：
 std::vector c{ 1, 2, 3 };
-print_three_ints(std::span<const int, 3>{ c.data(), 3 }); // OK: set pointer and length field.
-print_three_ints(std::span<const int, 3>{ c.cbegin(), c.cend() }); // OK: use iterator pairs.
+print_three_ints(std::span<const int, 3>{ c.data(), 3 }); // 正确：设置指针和长度字段。
+print_three_ints(std::span<const int, 3>{ c.cbegin(), c.cend() }); // 正确：使用迭代器对。
 ```
 
 ### 位操作
@@ -659,9 +659,9 @@ bool b = is_compile_time(); // false
 
 ### std::make_shared 支持数组
 ```c++
-auto p = std::make_shared<int[]>(5); // pointer to `int[5]`
-// OR
-auto p = std::make_shared<int[5]>(); // pointer to `int[5]`
+auto p = std::make_shared<int[]>(5); // 指向 `int[5]` 的指针
+// 或者
+auto p = std::make_shared<int[5]>(); // 指向 `int[5]` 的指针
 ```
 
 ### 字符串的 starts_with 和 ends_with
@@ -699,11 +699,11 @@ std::midpoint(1, 3); // == 2
 ### std::to_array
 将给定的数组/“类数组”对象转换为 `std::array`。
 ```c++
-std::to_array("foo"); // returns `std::array<char, 4>`
-std::to_array<int>({1, 2, 3}); // returns `std::array<int, 3>`
+std::to_array("foo"); // 返回 `std::array<char, 4>`
+std::to_array<int>({1, 2, 3}); // 返回 `std::array<int, 3>`
 
 int a[] = {1, 2, 3};
-std::to_array(a); // returns `std::array<int, 3>`
+std::to_array(a); // 返回 `std::array<int, 3>`
 ```
 
 ### std::bind_front
@@ -767,9 +767,9 @@ std::jthread t{
     }
 };
 
-// Request stop from the thread object:
+// 从线程对象请求停止：
 t.request_stop();
-// OR, through the stop source:
+// 或者，通过停止源（stop source）：
 std::stop_source stopSource = t.get_stop_source();
 stopSource.request_stop();
 ```

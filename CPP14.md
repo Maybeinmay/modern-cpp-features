@@ -40,10 +40,10 @@ std::string foo = identity("foo"); // == "foo"
 它允许创建用任意表达式初始化的 lambda 捕获。给被捕获值起的名字不必与外部作用域中的任何变量相关，它会在 lambda 函数体内部引入一个新名字。初始化表达式在 lambda 被*创建*时求值（而不是在其被*调用*时）。
 ```c++
 int factory(int i) { return i * 10; }
-auto f = [x = factory(2)] { return x; }; // returns 20
+auto f = [x = factory(2)] { return x; }; // 返回 20
 
 auto generator = [x = 0] () mutable {
-  // this would not compile without 'mutable' as we are modifying x on each call
+  // 如果不加 'mutable' 就无法编译，因为每次调用都会修改 x
   return x++;
 };
 auto a = generator(); // == 0
@@ -54,10 +54,10 @@ auto c = generator(); // == 2
 ```c++
 auto p = std::make_unique<int>(1);
 
-auto task1 = [=] { *p = 5; }; // ERROR: std::unique_ptr cannot be copied
-// vs.
-auto task2 = [p = std::move(p)] { *p = 5; }; // OK: p is move-constructed into the closure object
-// the original p is empty after task2 is created
+auto task1 = [=] { *p = 5; }; // 错误：std::unique_ptr 无法被复制
+// 对比
+auto task2 = [p = std::move(p)] { *p = 5; }; // OK：p 被移动构造进闭包对象
+// task2 创建后，原来的 p 为空
 ```
 使用这种方式，引用捕获可以与所引用的变量具有不同的名字。
 ```c++
@@ -66,13 +66,13 @@ auto f = [&r = x, x = x * 10] {
   ++r;
   return r + x;
 };
-f(); // sets x to 2 and returns 12
+f(); // 将 x 设为 2 并返回 12
 ```
 
 ### 返回类型推导
 在 C++14 中使用 `auto` 返回类型，编译器会尝试为你推导类型。对于 lambda，现在可以使用 `auto` 推导其返回类型，这使得返回推导出的引用或右值引用成为可能。
 ```c++
-// Deduce return type as `int`.
+// 推导返回类型为 `int`。
 auto f(int i) {
  return i;
 }
@@ -83,10 +83,10 @@ auto& f(T& t) {
   return t;
 }
 
-// Returns a reference to a deduced type.
+// 返回所推导类型的引用。
 auto g = [](auto& x) -> auto& { return f(x); };
 int y = 123;
-int& z = g(y); // reference to `y`
+int& z = g(y); // `y` 的引用
 ```
 
 ### decltype(auto)
@@ -104,14 +104,14 @@ auto z1 = std::move(z); // int
 decltype(auto) z2 = std::move(z); // int&&
 ```
 ```c++
-// Note: Especially useful for generic code!
+// 注意：对泛型代码尤其有用！
 
-// Return type is `int`.
+// 返回类型是 `int`。
 auto f(const int& i) {
  return i;
 }
 
-// Return type is `const int&`.
+// 返回类型是 `const int&`。
 decltype(auto) g(const int& i) {
  return i;
 }

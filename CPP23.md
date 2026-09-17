@@ -38,14 +38,14 @@ constexpr int g(int i) {
 ### 推导 `this`
 借助 C++23 引入的显式对象成员函数，现在可以通过将成员函数的第一个参数以 `this` 关键字为前缀来推导对象的类型和值类别：
 ```c++
-// NEW WAY USING DEDUCING THIS:
+// 使用推导 this 的新方式：
 struct T {
   decltype(auto) operator[](this auto& self, std::size_t idx) { 
     return self.mVector[idx]; 
   }
 };
 
-// OLD WAY:
+// 旧方式：
 struct T {
   value_t& operator[](std::size_t idx) {
     return mVector[idx];
@@ -131,7 +131,7 @@ is >> i; // i == 20
 is >> i; // i == 30
 ```
 ```c++
-char output[30]{}; // zero-initialize array
+char output[30]{}; // 零初始化数组
 std::ospanstream os{std::span<char>{output}};
 os << 10 << 20 << 30;
 std::span<char> sp = os.span();
@@ -142,9 +142,9 @@ std::span<char> sp = os.span();
 
 当抛出异常时，这个抽象还能安全地管理相关内存的生命周期。
 ```c++
-// p_handle is written (out) to.
+// p_handle 是写入（out）的目标。
 int c_api_create_handle(MyHandle** p_handle);
-// p_handle is both read (in) and written (out) to.
+// p_handle 既是读取（in）的目标，也是写入（out）的目标。
 int c_api_recreate_handle(MyHandle** p_handle);
 void c_api_delete_handle(MyHandle* handle);
 
@@ -157,12 +157,12 @@ struct resource_deleter {
 ```c++
 std::unique_ptr<MyHandle, resource_deleter> resource(nullptr);
 int err = c_api_create_handle(std::out_ptr(resource));
-// `resource` now owns the memory allocated within `c_api_create_handle`.
+// `resource` 现在拥有在 `c_api_create_handle` 中分配的内存。
 ```
 ```c++
 std::shared_ptr<MyHandle> resource(nullptr);
 int err = c_api_recreate_handle(std::inout_ptr(resource), resource_deleter{});
-// `resource` now shares the memory allocated within `c_api_recreate_handle`.
+// `resource` 现在共享在 `c_api_recreate_handle` 中分配的内存。
 ```
 
 inout/out 指针都支持（隐式地）转换为 `void**`，并支持显式地转换为用户指定的类型。

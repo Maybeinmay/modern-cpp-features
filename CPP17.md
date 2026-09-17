@@ -53,8 +53,8 @@ struct MyContainer {
   MyContainer(T val) : val{val} {}
   // ...
 };
-MyContainer c1 {1}; // OK MyContainer<int>
-MyContainer c2; // OK MyContainer<float>
+MyContainer c1 {1}; // OK：MyContainer<int>
+MyContainer c2; // OK：MyContainer<float>
 ```
 
 ### 用 auto 声明非类型模板参数
@@ -62,12 +62,12 @@ MyContainer c2; // OK MyContainer<float>
 ```c++
 template <auto... seq>
 struct my_integer_sequence {
-  // Implementation here ...
+  // 实现放在这里 ...
 };
 
-// Explicitly pass type `int` as template argument.
+// 显式将类型 `int` 作为模板实参传入。
 auto seq = std::integer_sequence<int, 0, 1, 2>();
-// Type is deduced to be `int`.
+// 类型被推导为 `int`。
 auto seq2 = my_integer_sequence<0, 1, 2>();
 ```
 \* - 例如，你不能把 `double` 用作模板参数类型，这也使得使用 `auto` 的这种推导无效。
@@ -79,7 +79,7 @@ auto seq2 = my_integer_sequence<0, 1, 2>();
 ```c++
 template <typename... Args>
 bool logicalAnd(Args... args) {
-    // Binary folding.
+    // 二元折叠。
     return (true && ... && args);
 }
 bool b = true;
@@ -89,7 +89,7 @@ logicalAnd(b, b2, true); // == true
 ```c++
 template <typename... Args>
 auto sum(Args... args) {
-    // Unary folding.
+    // 一元折叠。
     return (... + args);
 }
 sum(1.0, 2.0f, 3); // == 6.0
@@ -98,10 +98,10 @@ sum(1.0, 2.0f, 3); // == 6.0
 ### 从花括号初始化列表进行 auto 推导的新规则
 在使用统一初始化语法时对 `auto` 推导的修改。以前 `auto x {3};` 推导为 `std::initializer_list<int>`，现在则推导为 `int`。
 ```c++
-auto x1 {1, 2, 3}; // error: not a single element
-auto x2 = {1, 2, 3}; // x2 is std::initializer_list<int>
-auto x3 {3}; // x3 is int
-auto x4 {3.0}; // x4 is double
+auto x1 {1, 2, 3}; // 错误：不是单个元素
+auto x2 = {1, 2, 3}; // x2 是 std::initializer_list<int>
+auto x3 {3}; // x3 是 int
+auto x4 {3.0}; // x4 是 double
 ```
 
 ### constexpr lambda
@@ -150,7 +150,7 @@ valueRef(); // 321
 ### 内联变量
 inline 说明符不仅可以用于函数，也可以用于变量。声明为内联的变量与声明为内联的函数具有相同的语义。
 ```c++
-// Disassembly example using compiler explorer.
+// 使用 compiler explorer 的反汇编示例。
 struct S { int x; };
 inline S x1 = S{321}; // mov esi, dword ptr [x1]
                       // x1: .long 321
@@ -166,7 +166,7 @@ struct S {
   S() : id{count++} {}
   ~S() { count--; }
   int id;
-  static inline int count{0}; // declare and initialize count to 0 within the class
+  static inline int count{0}; // 在类内声明并将 count 初始化为 0
 };
 ```
 
@@ -208,9 +208,9 @@ std::unordered_map<std::string, int> mapping {
   {"c", 3}
 };
 
-// Destructure by reference.
+// 按引用解构。
 for (const auto& [key, value] : mapping) {
-  // Do something with key and value
+  // 对 key 和 value 做一些处理
 }
 ```
 
@@ -221,7 +221,7 @@ for (const auto& [key, value] : mapping) {
   std::lock_guard<std::mutex> lk(mx);
   if (v.empty()) v.push_back(val);
 }
-// vs.
+// 对比
 if (std::lock_guard<std::mutex> lk(mx); v.empty()) {
   v.push_back(val);
 }
@@ -232,7 +232,7 @@ switch (auto s = gadget.status()) {
   case OK: gadget.zip(); break;
   case Bad: throw BadFoo(s.message());
 }
-// vs.
+// 对比
 switch (Foo gadget(args); auto s = gadget.status()) {
   case OK: gadget.zip(); break;
   case Bad: throw BadFoo(s.message());
@@ -268,9 +268,9 @@ char x = u8'x';
 ```c++
 enum byte : unsigned char {};
 byte b {0}; // OK
-byte c {-1}; // ERROR
+byte c {-1}; // 错误
 byte d = byte{1}; // OK
-byte e = byte{256}; // ERROR
+byte e = byte{256}; // 错误
 ```
 
 ### \[\[fallthrough\]\]、\[\[nodiscard\]\]、\[\[maybe_unused\]\] 属性
@@ -295,14 +295,14 @@ switch (n) {
 * 当函数或类带有 `[[nodiscard]]` 属性而其返回值被丢弃时，会发出警告。
 ```c++
 [[nodiscard]] bool do_something() {
-  return is_success; // true for success, false for failure
+  return is_success; // 成功时为 true，失败时为 false
 }
 
-do_something(); // warning: ignoring return value of 'bool do_something()',
-                // declared with attribute 'nodiscard'
+do_something(); // 警告：忽略了 'bool do_something()' 的返回值，
+                // 该函数声明了 'nodiscard' 属性
 ```
 ```c++
-// Only issues a warning when `error_info` is returned by value.
+// 仅当 `error_info` 按值返回时才发出警告。
 struct [[nodiscard]] error_info {
   // ...
 };
@@ -313,14 +313,14 @@ error_info do_something() {
   return ei;
 }
 
-do_something(); // warning: ignoring returned value of type 'error_info',
-                // declared with attribute 'nodiscard'
+do_something(); // 警告：忽略了类型 'error_info' 的返回值，
+                // 该类型声明了 'nodiscard' 属性
 ```
 
 * `[[maybe_unused]]` 向编译器表明某个变量或参数可能未被使用，这是有意为之的。
 ```c++
 void my_callback(std::string msg, [[maybe_unused]] bool error) {
-  // Don't care if `msg` is an error message, just log it.
+  // 不关心 `msg` 是否是一条错误消息，直接记录即可。
   log(msg);
 }
 ```
@@ -365,12 +365,12 @@ void my_callback(std::string msg, [[maybe_unused]] bool error) {
 ### 类模板实参推导（CTAD）
 *类模板实参推导*（CTAD）允许编译器从构造函数的实参中推导模板实参。
 ```c++
-std::vector v{ 1, 2, 3 }; // deduces std::vector<int>
+std::vector v{ 1, 2, 3 }; // 推导为 std::vector<int>
 
 std::mutex mtx;
-auto lck = std::lock_guard{ mtx }; // deduces to std::lock_guard<std::mutex>
+auto lck = std::lock_guard{ mtx }; // 推导为 std::lock_guard<std::mutex>
 
-auto p = new std::pair{ 1.0, 2.0 }; // deduces to std::pair<double, double>*
+auto p = new std::pair{ 1.0, 2.0 }; // 推导为 std::pair<double, double>*
 ```
 
 对于用户定义的类型，如果适用，可以使用*推导指引*（deduction guide）来指导编译器如何推导模板实参：
@@ -383,16 +383,16 @@ struct container {
   container(Iter beg, Iter end);
 };
 
-// deduction guide
+// 推导指引
 template <typename Iter>
 container(Iter b, Iter e) -> container<typename std::iterator_traits<Iter>::value_type>;
 
-container a{ 7 }; // OK: deduces container<int>
+container a{ 7 }; // OK：推导为 container<int>
 
 std::vector<double> v{ 1.0, 2.0, 3.0 };
-auto b = container{ v.begin(), v.end() }; // OK: deduces container<double>
+auto b = container{ v.begin(), v.end() }; // OK：推导为 container<double>
 
-container c{ 5, 6 }; // ERROR: std::iterator_traits<int>::value_type is not a type
+container c{ 5, 6 }; // 错误：std::iterator_traits<int>::value_type 不是一种类型
 ```
 
 ## C++17 库特性
@@ -421,7 +421,7 @@ std::optional<std::string> create(bool b) {
 
 create(false).value_or("empty"); // == "empty"
 create(true).value(); // == "Godzilla"
-// optional-returning factory functions are usable as conditions of while and if
+// 返回 optional 的工厂函数可用作 while 和 if 的条件
 if (auto str = create(true)) {
   // ...
 }
@@ -440,11 +440,11 @@ std::any_cast<int>(x) // == 10
 ### std::string_view
 对字符串的非拥有引用。在为字符串提供抽象层（例如用于解析）时很有用。
 ```c++
-// Regular strings.
+// 普通字符串。
 std::string_view cppstr {"foo"};
-// Wide strings.
+// 宽字符串。
 std::wstring_view wcstr_v {L"baz"};
-// Character arrays.
+// 字符数组。
 char array[3] = {'b', 'a', 'r'};
 std::string_view array_v(array, std::size(array));
 ```
@@ -521,8 +521,8 @@ int j = std::to_integer<int>(c); // 0
 ```c++
 std::map<int, string> src {{1, "one"}, {2, "two"}, {3, "buckle my shoe"}};
 std::map<int, string> dst {{3, "three"}};
-dst.insert(src.extract(src.find(1))); // Cheap remove and insert of { 1, "one" } from `src` to `dst`.
-dst.insert(src.extract(2)); // Cheap remove and insert of { 2, "two" } from `src` to `dst`.
+dst.insert(src.extract(src.find(1))); // 低成本地从 `src` 移除并插入 { 1, "one" } 到 `dst`。
+dst.insert(src.extract(2)); // 低成本地从 `src` 移除并插入 { 2, "two" } 到 `dst`。
 // dst == { { 1, "one" }, { 2, "two" }, { 3, "three" } };
 ```
 
@@ -558,9 +558,9 @@ m.insert(std::move(e));
 许多 STL 算法（例如 `copy`、`find` 和 `sort`）开始支持*并行执行策略*：`seq`、`par` 和 `par_unseq`，分别对应“顺序”、“并行”和“并行非顺序”。
 ```c++
 std::vector<int> longVector;
-// Find element using parallel execution policy
+// 使用并行执行策略查找元素
 auto result1 = std::find(std::execution::par, std::begin(longVector), std::end(longVector), 2);
-// Sort elements using sequential execution policy
+// 使用顺序执行策略对元素排序
 auto result2 = std::sort(std::execution::seq, std::begin(longVector), std::end(longVector));
 ```
 
@@ -569,11 +569,11 @@ auto result2 = std::sort(std::execution::seq, std::begin(longVector), std::end(l
 ```c++
 const std::string ALLOWED_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 std::string guid;
-// Sample 5 characters from ALLOWED_CHARS.
+// 从 ALLOWED_CHARS 中抽取 5 个字符。
 std::sample(ALLOWED_CHARS.begin(), ALLOWED_CHARS.end(), std::back_inserter(guid),
   5, std::mt19937{ std::random_device{}() });
 
-std::cout << guid; // e.g. G1fW2
+std::cout << guid; // 例如 G1fW2
 ```
 
 ### std::clamp
@@ -583,7 +583,7 @@ std::clamp(42, -1, 1); // == 1
 std::clamp(-42, -1, 1); // == -1
 std::clamp(0, -1, 1); // == 0
 
-// `std::clamp` also accepts a custom comparator:
+// `std::clamp` 也接受自定义比较器：
 std::clamp(0, -1, 1, std::less<>{}); // == 0
 ```
 
@@ -594,7 +594,7 @@ std::clamp(0, -1, 1, std::less<>{}); // == 0
 ```c++
 const std::array<int, 3> a{ 1, 2, 3 };
 std::reduce(std::cbegin(a), std::cend(a)); // == 6
-// Using a custom binary op:
+// 使用自定义二元运算：
 std::reduce(std::cbegin(a), std::cend(a), 1, std::multiplies<>{}); // == 6
 ```
 此外，你还可以为归约器指定变换操作：
@@ -643,9 +643,9 @@ const std::ostream_iterator<int> ostream_it{ std::cout, " " };
 const auto is_even = [](const auto n) { return n % 2 == 0; };
 std::vector<int> v{ 0, 1, 2, 3, 4 };
 
-// Print all even numbers.
+// 打印所有偶数。
 std::copy_if(std::cbegin(v), std::cend(v), ostream_it, is_even); // 0 2 4
-// Print all odd (not even) numbers.
+// 打印所有奇数（非偶数）。
 std::copy_if(std::cbegin(v), std::cend(v), ostream_it, std::not_fn(is_even)); // 1 3
 ```
 
@@ -665,14 +665,14 @@ std::copy_if(std::cbegin(v), std::cend(v), ostream_it, std::not_fn(is_even)); //
 ```c++
 const int n = 123;
 
-// Can use any container, string, array, etc.
+// 可以使用任意容器、字符串、数组等。
 std::string str;
-str.resize(3); // hold enough storage for each digit of `n`
+str.resize(3); // 为 `n` 的每一位数字预留足够的存储空间
 
 const auto [ ptr, ec ] = std::to_chars(str.data(), str.data() + str.size(), n);
 
 if (ec == std::errc{}) { std::cout << str << std::endl; } // 123
-else { /* handle failure */ }
+else { /* 处理失败 */ }
 ```
 
 将值为 `"123"` 的 `std::string` 转换为整数：
@@ -683,7 +683,7 @@ int n;
 const auto [ ptr, ec ] = std::from_chars(str.data(), str.data() + str.size(), n);
 
 if (ec == std::errc{}) { std::cout << n << std::endl; } // 123
-else { /* handle failure */ }
+else { /* 处理失败 */ }
 ```
 
 ### 用于 chrono duration 和 timepoint 的取整函数
