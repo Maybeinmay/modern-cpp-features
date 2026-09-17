@@ -1,75 +1,75 @@
 # C++11
 
-## Overview
-Many of these descriptions and examples are taken from various resources (see [Acknowledgements](#acknowledgements) section) and summarized in my own words.
+## 概述
+本文中的许多描述和示例来自各种资源（参见 [致谢](#致谢) 部分），并由我用自己的话进行了总结。
 
-C++11 includes the following new language features:
-- [move semantics](#move-semantics)
-- [variadic templates](#variadic-templates)
-- [rvalue references](#rvalue-references)
-- [forwarding references](#forwarding-references)
-- [initializer lists](#initializer-lists)
-- [static assertions](#static-assertions)
+C++11 包含以下新的语言特性：
+- [移动语义](#移动语义)
+- [可变参数模板](#可变参数模板)
+- [右值引用](#右值引用)
+- [转发引用](#转发引用)
+- [初始化器列表](#初始化器列表)
+- [静态断言](#静态断言)
 - [auto](#auto)
-- [lambda expressions](#lambda-expressions)
+- [lambda 表达式](#lambda-表达式)
 - [decltype](#decltype)
-- [type aliases](#type-aliases)
+- [类型别名](#类型别名)
 - [nullptr](#nullptr)
-- [strongly-typed enums](#strongly-typed-enums)
-- [attributes](#attributes)
+- [强类型枚举](#强类型枚举)
+- [属性](#属性)
 - [constexpr](#constexpr)
-- [delegating constructors](#delegating-constructors)
-- [user-defined literals](#user-defined-literals)
-- [explicit virtual overrides](#explicit-virtual-overrides)
-- [final specifier](#final-specifier)
-- [default functions](#default-functions)
-- [deleted functions](#deleted-functions)
-- [range-based for loops](#range-based-for-loops)
-- [special member functions for move semantics](#special-member-functions-for-move-semantics)
-- [converting constructors](#converting-constructors)
-- [explicit conversion functions](#explicit-conversion-functions)
-- [inline-namespaces](#inline-namespaces)
-- [non-static data member initializers](#non-static-data-member-initializers)
-- [right angle brackets](#right-angle-brackets)
-- [ref-qualified member functions](#ref-qualified-member-functions)
-- [trailing return types](#trailing-return-types)
-- [noexcept specifier](#noexcept-specifier)
-- [char32_t and char16_t](#char32_t-and-char16_t)
-- [raw string literals](#raw-string-literals)
+- [委托构造函数](#委托构造函数)
+- [用户定义字面量](#用户定义字面量)
+- [显式虚函数覆盖](#显式虚函数覆盖)
+- [final 说明符](#final-说明符)
+- [默认函数](#默认函数)
+- [删除函数](#删除函数)
+- [基于范围的 for 循环](#基于范围的-for-循环)
+- [用于移动语义的特殊成员函数](#用于移动语义的特殊成员函数)
+- [转换构造函数](#转换构造函数)
+- [显式转换函数](#显式转换函数)
+- [内联命名空间](#内联命名空间)
+- [非静态数据成员初始化器](#非静态数据成员初始化器)
+- [右尖括号](#右尖括号)
+- [带引用限定的成员函数](#带引用限定的成员函数)
+- [尾置返回类型](#尾置返回类型)
+- [noexcept 说明符](#noexcept-说明符)
+- [char32_t 和 char16_t](#char32_t-和-char16_t)
+- [原始字符串字面量](#原始字符串字面量)
 
-C++11 includes the following new library features:
+C++11 包含以下新的库特性：
 - [std::move](#stdmove)
 - [std::forward](#stdforward)
 - [std::thread](#stdthread)
 - [std::to_string](#stdto_string)
-- [type traits](#type-traits)
-- [smart pointers](#smart-pointers)
+- [类型萃取](#类型萃取)
+- [智能指针](#智能指针)
 - [std::chrono](#stdchrono)
-- [tuples](#tuples)
+- [元组](#元组)
 - [std::tie](#stdtie)
 - [std::array](#stdarray)
-- [unordered containers](#unordered-containers)
+- [无序容器](#无序容器)
 - [std::make_shared](#stdmake_shared)
 - [std::ref](#stdref)
-- [memory model](#memory-model)
+- [内存模型](#内存模型)
 - [std::async](#stdasync)
 - [std::begin/end](#stdbeginend)
 
-## C++11 Language Features
+## C++11 语言特性
 
-### Move semantics
-Moving an object means to transfer ownership of some resource it manages to another object.
+### 移动语义
+移动一个对象意味着把它所管理的某些资源的所有权转移到另一个对象。
 
-The first benefit of move semantics is performance optimization. When an object is about to reach the end of its lifetime, either because it's a temporary or by explicitly calling `std::move`, a move is often a cheaper way to transfer resources. For example, moving a `std::vector` is just copying some pointers and internal state over to the new vector -- copying would involve having to copy every single contained element in the vector, which is expensive and unnecessary if the old vector will soon be destroyed.
+移动语义的第一个好处是性能优化。当一个对象即将到达其生命周期的终点时（要么因为它是个临时对象，要么因为显式调用了 `std::move`），移动通常是转移资源更廉价的方式。例如，移动一个 `std::vector` 只是把一些指针和内部状态拷贝到新的 vector 中——而复制则涉及复制 vector 中包含的每一个元素，如果旧的 vector 很快就会被销毁，这样做既昂贵又没有必要。
 
-Moves also make it possible for non-copyable types such as `std::unique_ptr`s ([smart pointers](#smart-pointers)) to guarantee at the language level that there is only ever one instance of a resource being managed at a time, while being able to transfer an instance between scopes.
+移动还使得像 `std::unique_ptr` 这样的不可复制类型（参见 [智能指针](#智能指针)）能够在语言层面保证同一时刻只有一个实例在管理某个资源，同时还能在作用域之间转移该实例。
 
-See the sections on: [rvalue references](#rvalue-references), [special member functions for move semantics](#special-member-functions-for-move-semantics), [`std::move`](#stdmove), [`std::forward`](#stdforward), [`forwarding references`](#forwarding-references).
+参见：[右值引用](#右值引用)、[用于移动语义的特殊成员函数](#用于移动语义的特殊成员函数)、[`std::move`](#stdmove)、[`std::forward`](#stdforward)、[`转发引用`](#转发引用)。
 
-### Rvalue references
-C++11 introduces a new reference termed the _rvalue reference_. An rvalue reference to `T`, which is a non-template type parameter (such as `int`, or a user-defined type), is created with the syntax `T&&`. Rvalue references only bind to rvalues.
+### 右值引用
+C++11 引入了一种新的引用，称为*右值引用*。对 `T` 的右值引用（`T` 是非模板类型参数，例如 `int` 或用户定义类型）使用语法 `T&&` 创建。右值引用只能绑定到右值。
 
-Type deduction with lvalues and rvalues:
+左值和右值的类型推导：
 ```c++
 int x = 0; // `x` is an lvalue of type `int`
 int& xl = x; // `xl` is an lvalue of type `int&`
@@ -88,25 +88,25 @@ f(xr2);           // calls f(int&)
 f(std::move(xr2)); // calls f(int&& x)
 ```
 
-See also: [`std::move`](#stdmove), [`std::forward`](#stdforward), [`forwarding references`](#forwarding-references).
+参见：[`std::move`](#stdmove)、[`std::forward`](#stdforward)、[`转发引用`](#转发引用)。
 
-### Forwarding references
-Also known (unofficially) as _universal references_. A forwarding reference is created with the syntax `T&&` where `T` is a template type parameter, or using `auto&&`. This enables _perfect forwarding_: the ability to pass arguments while maintaining their value category (e.g. lvalues stay as lvalues, temporaries are forwarded as rvalues).
+### 转发引用
+也被（非正式地）称为*万能引用*。转发引用使用语法 `T&&` 创建，其中 `T` 是模板类型参数，或者使用 `auto&&`。这使得*完美转发*成为可能：在传递参数的同时保持它们的值类别（例如左值仍然是左值，临时对象被作为右值转发）。
 
-Forwarding references allow a reference to bind to either an lvalue or rvalue depending on the type. Forwarding references follow the rules of _reference collapsing_:
-* `T& &` becomes `T&`
-* `T& &&` becomes `T&`
-* `T&& &` becomes `T&`
-* `T&& &&` becomes `T&&`
+转发引用允许引用根据类型绑定到左值或右值。转发引用遵循*引用折叠*规则：
+* `T& &` 变成 `T&`
+* `T& &&` 变成 `T&`
+* `T&& &` 变成 `T&`
+* `T&& &&` 变成 `T&&`
 
-`auto` type deduction with lvalues and rvalues:
+`auto` 在左值和右值上的类型推导：
 ```c++
 int x = 0; // `x` is an lvalue of type `int`
 auto&& al = x; // `al` is an lvalue of type `int&` -- binds to the lvalue, `x`
 auto&& ar = 0; // `ar` is an lvalue of type `int&&` -- binds to the rvalue temporary, `0`
 ```
 
-Template type parameter deduction with lvalues and rvalues:
+模板类型参数在左值和右值上的推导：
 ```c++
 // Since C++14 or later:
 void f(auto&& t) {
@@ -131,10 +131,10 @@ f(z); // T is int&, deduces as f(int& &&) => f(int&)
 f(std::move(z)); // T is int, deduces as f(int &&) => f(int&&)
 ```
 
-See also: [`std::move`](#stdmove), [`std::forward`](#stdforward), [`rvalue references`](#rvalue-references).
+参见：[`std::move`](#stdmove)、[`std::forward`](#stdforward)、[`右值引用`](#右值引用)。
 
-### Variadic templates
-The `...` syntax creates a _parameter pack_ or expands one. A template _parameter pack_ is a template parameter that accepts zero or more template arguments (non-types, types, or templates). A template with at least one parameter pack is called a _variadic template_.
+### 可变参数模板
+`...` 语法用于创建*参数包*或展开参数包。模板*参数包*是一种可以接受零个或多个模板实参（非类型、类型或模板）的模板参数。至少含有一个参数包的模板称为*可变参数模板*。
 ```c++
 template <typename... T>
 struct arity {
@@ -144,7 +144,7 @@ static_assert(arity<>::value == 0);
 static_assert(arity<char, short, int>::value == 3);
 ```
 
-An interesting use for this is creating an _initializer list_ from a _parameter pack_ in order to iterate over variadic function arguments.
+它一个有趣的用法是从*参数包*创建*初始化器列表*，以便遍历可变参数的函数实参。
 ```c++
 template <typename First, typename... Args>
 auto sum(const First first, const Args... args) -> decltype(first) {
@@ -157,8 +157,8 @@ sum(1, 2, 3);       // 6
 sum(1.5, 2.0, 3.7); // 7.2
 ```
 
-### Initializer lists
-A lightweight array-like container of elements created using a "braced list" syntax. For example, `{ 1, 2, 3 }` creates a sequences of integers, that has type `std::initializer_list<int>`. Useful as a replacement to passing a vector of objects to a function.
+### 初始化器列表
+一种使用“花括号列表”语法创建的轻量级、类数组的元素容器。例如，`{ 1, 2, 3 }` 创建一个整数序列，其类型为 `std::initializer_list<int>`。它适合用来替代向函数传递对象 vector 的做法。
 ```c++
 int sum(const std::initializer_list<int>& list) {
   int total = 0;
@@ -175,8 +175,8 @@ sum({1, 2, 3}); // == 6
 sum({}); // == 0
 ```
 
-### Static assertions
-Assertions that are evaluated at compile-time.
+### 静态断言
+在编译期求值的断言。
 ```c++
 constexpr int x = 0;
 constexpr int y = 1;
@@ -184,7 +184,7 @@ static_assert(x == y, "x != y");
 ```
 
 ### auto
-`auto`-typed variables are deduced by the compiler according to the type of their initializer.
+`auto` 类型的变量由编译器根据其初始化器的类型推导得出。
 ```c++
 auto a = 3.14; // double
 auto b = 1; // int
@@ -199,7 +199,7 @@ auto l = 1, m = true, n = 1.61; // error -- `l` deduced to be int, `m` is bool
 auto o; // error -- `o` requires initializer
 ```
 
-Extremely useful for readability, especially for complicated types:
+对于可读性极为有用，尤其是面对复杂类型时：
 ```c++
 std::vector<int> v = ...;
 std::vector<int>::const_iterator cit = v.cbegin();
@@ -207,7 +207,7 @@ std::vector<int>::const_iterator cit = v.cbegin();
 auto cit = v.cbegin();
 ```
 
-Functions can also deduce the return type using `auto`. In C++11, a return type must be specified either explicitly, or using `decltype` like so:
+函数也可以使用 `auto` 推导返回类型。在 C++11 中，返回类型必须显式指定，或者像这样使用 `decltype`：
 ```c++
 template <typename X, typename Y>
 auto add(X x, Y y) -> decltype(x + y) {
@@ -217,15 +217,15 @@ add(1, 2); // == 3
 add(1, 2.0); // == 3.0
 add(1.5, 1.5); // == 3.0
 ```
-The trailing return type in the above example is the _declared type_ (see section on [`decltype`](#decltype)) of the expression `x + y`. For example, if `x` is an integer and `y` is a double, `decltype(x + y)` is a double. Therefore, the above function will deduce the type depending on what type the expression `x + y` yields. Notice that the trailing return type has access to its parameters, and `this` when appropriate.
+上面例子中的尾置返回类型是表达式 `x + y` 的*声明类型*（参见 [`decltype`](#decltype) 一节）。例如，如果 `x` 是整数而 `y` 是 double，那么 `decltype(x + y)` 就是 double。因此，上面的函数会根据表达式 `x + y` 产生的类型来推导类型。注意，尾置返回类型可以访问其参数，在适当的时候也可以访问 `this`。
 
-### Lambda expressions
-A `lambda` is an unnamed function object capable of capturing variables in scope. It features: a _capture list_; an optional set of parameters with an optional trailing return type; and a body. Examples of capture lists:
-* `[]` - captures nothing.
-* `[=]` - capture local objects (local variables, parameters) in scope by value.
-* `[&]` - capture local objects (local variables, parameters) in scope by reference.
-* `[this]` - capture `this` by reference.
-* `[a, &b]` - capture objects `a` by value, `b` by reference.
+### lambda 表达式
+lambda 是一个能够捕获作用域中变量的无名函数对象。它包含：一个*捕获列表*；一组可选的参数以及可选的尾置返回类型；以及一个函数体。捕获列表的示例：
+* `[]` - 不捕获任何东西。
+* `[=]` - 按值捕获作用域中的局部对象（局部变量、参数）。
+* `[&]` - 按引用捕获作用域中的局部对象（局部变量、参数）。
+* `[this]` - 按引用捕获 `this`。
+* `[a, &b]` - 按值捕获对象 `a`，按引用捕获 `b`。
 
 ```c++
 int x = 1;
@@ -239,7 +239,7 @@ addX(1); // == 2
 auto getXRef = [&]() -> int& { return x; };
 getXRef(); // int& to `x`
 ```
-By default, value-captures cannot be modified inside the lambda because the compiler-generated method is marked as `const`. The `mutable` keyword allows modifying captured variables. The keyword is placed after the parameter-list (which must be present even if it is empty).
+默认情况下，按值捕获的内容不能在 lambda 内部修改，因为编译器生成的方法被标记为 `const`。`mutable` 关键字允许修改被捕获的变量。该关键字放在参数列表之后（即使参数列表为空，也必须写出）。
 ```c++
 int x = 1;
 
@@ -251,7 +251,7 @@ auto f3 = [x]() mutable { x = 2; }; // OK: the lambda can perform any operations
 ```
 
 ### decltype
-`decltype` is an operator which returns the _declared type_ of an expression passed to it. cv-qualifiers and references are maintained if they are part of the expression. Examples of `decltype`:
+`decltype` 是一个运算符，它返回传给它的表达式的*声明类型*。如果 cv 限定符和引用是表达式的一部分，它们会被保留。`decltype` 的示例：
 ```c++
 int a = 1; // `a` is declared as type `int`
 decltype(a) b = a; // `decltype(a)` is `int`
@@ -270,10 +270,10 @@ auto add(X x, Y y) -> decltype(x + y) {
 add(1, 2.0); // `decltype(x + y)` => `decltype(3.0)` => `double`
 ```
 
-See also: [`decltype(auto) (C++14)`](README.md#decltypeauto).
+参见：[`decltype(auto) (C++14)`](README.md#decltypeauto)。
 
-### Type aliases
-Semantically similar to using a `typedef` however, type aliases with `using` are easier to read and are compatible with templates.
+### 类型别名
+语义上与使用 `typedef` 类似，但使用 `using` 的类型别名更易读，并且与模板兼容。
 ```c++
 template <typename T>
 using Vec = std::vector<T>;
@@ -284,7 +284,7 @@ String s {"foo"};
 ```
 
 ### nullptr
-C++11 introduces a new null pointer type designed to replace C's `NULL` macro. `nullptr` itself is of type `std::nullptr_t` and can be implicitly converted into pointer types, and unlike `NULL`, not convertible to integral types except `bool`.
+C++11 引入了一种新的空指针类型，旨在替代 C 的 `NULL` 宏。`nullptr` 本身的类型是 `std::nullptr_t`，可以隐式转换为指针类型，并且不同于 `NULL`，它不能转换为整型（除 `bool` 之外）。
 ```c++
 void foo(int);
 void foo(char*);
@@ -292,8 +292,8 @@ foo(NULL); // error -- ambiguous
 foo(nullptr); // calls foo(char*)
 ```
 
-### Strongly-typed enums
-Type-safe enums that solve a variety of problems with C-style enums including: implicit conversions, inability to specify the underlying type, scope pollution.
+### 强类型枚举
+类型安全的枚举，解决了 C 风格枚举的诸多问题，包括：隐式转换、无法指定底层类型、作用域污染。
 ```c++
 // Specifying underlying type as `unsigned int`
 enum class Color : unsigned int { Red = 0xff0000, Green = 0xff00, Blue = 0xff };
@@ -302,8 +302,8 @@ enum class Alert : bool { Red, Green };
 Color c = Color::Red;
 ```
 
-### Attributes
-Attributes provide a universal syntax over `__attribute__(...)`, `__declspec`, etc.
+### 属性
+属性为 `__attribute__(...)`、`__declspec` 等提供了一种通用的语法。
 ```c++
 // `noreturn` attribute indicates `f` doesn't return.
 [[ noreturn ]] void f() {
@@ -312,7 +312,7 @@ Attributes provide a universal syntax over `__attribute__(...)`, `__declspec`, e
 ```
 
 ### constexpr
-Constant expressions are expressions that are *possibly* evaluated by the compiler at compile-time. Only non-complex computations can be carried out in a constant expression (these rules are progressively relaxed in later versions). Use the `constexpr` specifier to indicate the variable, function, etc. is a constant expression.
+常量表达式是指*可能*由编译器在编译期求值的表达式。常量表达式中只能进行非复杂的计算（这些规则在后来的版本中被逐步放宽）。使用 `constexpr` 说明符来表明变量、函数等是常量表达式。
 ```c++
 constexpr int square(int x) {
   return x * x;
@@ -328,15 +328,15 @@ int b = square2(2); // mov edi, 2
                     // call square2(int)
                     // mov DWORD PTR [rbp-8], eax
 ```
-In the previous snippet, notice that the computation when calling `square` is carried out at compile-time, and then the result is embedded in the code generation, while `square2` is called at run-time.
+在上面的代码片段中，注意调用 `square` 时的计算是在编译期完成的，然后结果被直接嵌入到生成的代码中，而 `square2` 则是在运行时被调用。
 
-`constexpr` values are those that the compiler can evaluate, but are not guaranteed to, at compile-time:
+`constexpr` 值是编译器能够在编译期求值的值，但并不保证一定在编译期求值：
 ```c++
 const int x = 123;
 constexpr const int& y = x; // error -- constexpr variable `y` must be initialized by a constant expression
 ```
 
-Constant expressions with classes:
+带类的常量表达式：
 ```c++
 struct Complex {
   constexpr Complex(double r, double i) : re{r}, im{i} { }
@@ -351,8 +351,8 @@ private:
 constexpr Complex I(0, 1);
 ```
 
-### Delegating constructors
-Constructors can now call other constructors in the same class using an initializer list.
+### 委托构造函数
+构造函数现在可以使用初始化器列表来调用同一个类中的其他构造函数。
 ```c++
 struct Foo {
   int foo;
@@ -364,10 +364,10 @@ Foo foo;
 foo.foo; // == 0
 ```
 
-### User-defined literals
-User-defined literals allow you to extend the language and add your own syntax. To create a literal, define a `T operator "" X(...) { ... }` function that returns a type `T`, with a name `X`. Note that the name of this function defines the name of the literal. Any literal names not starting with an underscore are reserved and won't be invoked. There are rules on what parameters a user-defined literal function should accept, according to what type the literal is called on.
+### 用户定义字面量
+用户定义字面量允许你扩展语言并添加自己的语法。要创建字面量，需要定义一个 `T operator "" X(...) { ... }` 函数，它返回类型 `T`，名字为 `X`。注意，这个函数的名字就定义了字面量的名字。任何不以 下划线开头的字面量名都是保留的，不会被调用。关于用户定义字面量函数应该接受什么参数，取决于字面量是在什么类型上调用的，这里有相应的规则。
 
-Converting Celsius to Fahrenheit:
+将摄氏度转换为华氏度：
 ```c++
 // `unsigned long long` parameter required for integer literal.
 long long operator "" _celsius(unsigned long long tempCelsius) {
@@ -376,7 +376,7 @@ long long operator "" _celsius(unsigned long long tempCelsius) {
 24_celsius; // == 75
 ```
 
-String to integer conversion:
+字符串转整数：
 ```c++
 // `const char*` and `std::size_t` required as parameters.
 int operator "" _int(const char* str, std::size_t) {
@@ -386,8 +386,8 @@ int operator "" _int(const char* str, std::size_t) {
 "123"_int; // == 123, with type `int`
 ```
 
-### Explicit virtual overrides
-Specifies that a virtual function overrides another virtual function. If the virtual function does not override a parent's virtual function, throws a compiler error.
+### 显式虚函数覆盖
+指定某个虚函数覆盖了另一个虚函数。如果该虚函数并没有覆盖父类的虚函数，就会产生编译错误。
 ```c++
 struct A {
   virtual void foo();
@@ -401,8 +401,8 @@ struct B : A {
 };
 ```
 
-### Final specifier
-Specifies that a virtual function cannot be overridden in a derived class or that a class cannot be inherited from.
+### final 说明符
+指定某个虚函数不能在派生类中被覆盖，或者某个类不能被继承。
 ```c++
 struct A {
   virtual void foo();
@@ -417,14 +417,14 @@ struct C : B {
 };
 ```
 
-Class cannot be inherited from.
+类不能被继承。
 ```c++
 struct A final {};
 struct B : A {}; // error -- base 'A' is marked 'final'
 ```
 
-### Default functions
-A more elegant, efficient way to provide a default implementation of a function, such as a constructor.
+### 默认函数
+一种更优雅、更高效地为函数（例如构造函数）提供默认实现的方式。
 ```c++
 struct A {
   A() = default;
@@ -435,7 +435,7 @@ A a; // a.x == 1
 A a2 {123}; // a.x == 123
 ```
 
-With inheritance:
+配合继承：
 ```c++
 struct B {
   B() : x{1} {}
@@ -450,8 +450,8 @@ struct C : B {
 C c; // c.x == 1
 ```
 
-### Deleted functions
-A more elegant, efficient way to provide a deleted implementation of a function. Useful for preventing copies on objects.
+### 删除函数
+一种更优雅、更高效地为函数提供“已删除”实现的方式。对于阻止对象被复制很有用。
 ```c++
 class A {
   int x;
@@ -467,23 +467,23 @@ A y = x; // error -- call to deleted copy constructor
 y = x; // error -- operator= deleted
 ```
 
-### Range-based for loops
-Syntactic sugar for iterating over a container's elements.
+### 基于范围的 for 循环
+用于遍历容器元素的语法糖。
 ```c++
 std::array<int, 5> a {1, 2, 3, 4, 5};
 for (int& x : a) x *= 2;
 // a == { 2, 4, 6, 8, 10 }
 ```
 
-Note the difference when using `int` as opposed to `int&`:
+注意使用 `int` 与使用 `int&` 时的区别：
 ```c++
 std::array<int, 5> a {1, 2, 3, 4, 5};
 for (int x : a) x *= 2;
 // a == { 1, 2, 3, 4, 5 }
 ```
 
-### Special member functions for move semantics
-The copy constructor and copy assignment operator are called when copies are made, and with C++11's introduction of move semantics, there is now a move constructor and move assignment operator for moves.
+### 用于移动语义的特殊成员函数
+进行拷贝时会调用拷贝构造函数和拷贝赋值运算符，而随着 C++11 引入移动语义，现在有了用于移动的移动构造函数和移动赋值运算符。
 ```c++
 struct A {
   std::string s;
@@ -507,8 +507,8 @@ a2 = std::move(a3); // move-assignment using std::move
 a1 = f(A{}); // move-assignment from rvalue temporary
 ```
 
-### Converting constructors
-Converting constructors will convert values of braced list syntax into constructor arguments.
+### 转换构造函数
+转换构造函数会把花括号列表语法中的值转换为构造函数的实参。
 ```c++
 struct A {
   A(int) {}
@@ -522,7 +522,7 @@ A c = {0, 0}; // calls A::A(int, int)
 A d {0, 0, 0}; // calls A::A(int, int, int)
 ```
 
-Note that the braced list syntax does not allow narrowing:
+注意，花括号列表语法不允许窄化转换：
 ```c++
 struct A {
   A(int) {}
@@ -532,7 +532,7 @@ A a(1.1); // OK
 A b {1.1}; // Error narrowing conversion from double to int
 ```
 
-Note that if a constructor accepts a `std::initializer_list`, it will be called instead:
+注意，如果某个构造函数接受 `std::initializer_list`，那么它会被优先调用：
 ```c++
 struct A {
   A(int) {}
@@ -547,8 +547,8 @@ A c = {0, 0}; // calls A::A(std::initializer_list<int>)
 A d {0, 0, 0}; // calls A::A(std::initializer_list<int>)
 ```
 
-### Explicit conversion functions
-Conversion functions can now be made explicit using the `explicit` specifier.
+### 显式转换函数
+转换函数现在可以使用 `explicit` 说明符变为显式的。
 ```c++
 struct A {
   operator bool() const { return true; }
@@ -566,8 +566,8 @@ B b;
 if (b); // OK calls B::operator bool()
 bool bb = b; // error copy-initialization does not consider B::operator bool()
 ```
-### Inline namespaces
-All members of an inline namespace are treated as if they were part of its parent namespace, allowing specialization of functions and easing the process of versioning. This is a transitive property, if A contains B, which in turn contains C and both B and C are inline namespaces, C's members can be used as if they were on A.
+### 内联命名空间
+内联命名空间的所有成员都被当作其父命名空间的成员一样对待，这允许对函数进行特化，并简化了版本管理的过程。这是一个传递性质：如果 A 包含 B，B 又包含 C，且 B 和 C 都是内联命名空间，那么 C 的成员就可以像在 A 中一样使用。
 
 ```c++
 namespace Program {
@@ -585,8 +585,8 @@ int oldVersion {Program::Version1::getVersion()}; // Uses getVersion() from Vers
 bool firstVersion {Program::isFirstVersion()};    // Does not compile when Version2 is added
 ```
 
-### Non-static data member initializers
-Allows non-static data members to be initialized where they are declared, potentially cleaning up constructors of default initializations.
+### 非静态数据成员初始化器
+允许非静态数据成员在声明处进行初始化，从而有可能清理掉构造函数中的默认初始化代码。
 
 ```c++
 // Default initialization prior to C++11
@@ -602,16 +602,16 @@ class Human {
 };
 ```
 
-### Right angle brackets
-C++11 is now able to infer when a series of right angle brackets is used as an operator or as a closing statement of typedef, without having to add whitespace.
+### 右尖括号
+C++11 现在能够推断出一连串右尖括号是用作运算符还是用作 typedef 的结束符号，而无需添加空格。
 
 ```c++
 typedef std::map<int, std::map <int, std::map <int, int> > > cpp98LongTypedef;
 typedef std::map<int, std::map <int, std::map <int, int>>>   cpp11LongTypedef;
 ```
 
-### Ref-qualified member functions
-Member functions can now be qualified depending on whether `*this` is an lvalue or rvalue reference.
+### 带引用限定的成员函数
+成员函数现在可以根据 `*this` 是左值引用还是右值引用来进行限定。
 
 ```c++
 struct Bar {
@@ -638,8 +638,8 @@ std::move(foo).getBar(); // calls `Bar&& Foo::getBar() &&`
 std::move(foo2).getBar(); // calls `const Bar&& Foo::getBar() const&`
 ```
 
-### Trailing return types
-C++11 allows functions and lambdas an alternative syntax for specifying their return types.
+### 尾置返回类型
+C++11 允许函数和 lambda 使用另一种语法来指定返回类型。
 ```c++
 int f() {
   return 123;
@@ -654,7 +654,7 @@ auto g = []() -> int {
   return 123;
 };
 ```
-This feature is especially useful when certain return types cannot be resolved:
+当某些返回类型无法被解析时，这个特性特别有用：
 ```c++
 // NOTE: This does not compile!
 template <typename T, typename U>
@@ -668,10 +668,10 @@ auto add(T a, U b) -> decltype(a + b) {
     return a + b;
 }
 ```
-In C++14, [`decltype(auto) (C++14)`](README.md#decltypeauto) can be used instead.
+在 C++14 中，可以改用 [`decltype(auto) (C++14)`](README.md#decltypeauto)。
 
-### Noexcept specifier
-The `noexcept` specifier specifies whether a function could throw exceptions. It is an improved version of `throw()`.
+### noexcept 说明符
+`noexcept` 说明符指定函数是否可能抛出异常。它是 `throw()` 的改进版本。
 
 ```c++
 void func1() noexcept;        // does not throw
@@ -681,7 +681,7 @@ void func3() throw();         // does not throw
 void func4() noexcept(false); // may throw
 ```
 
-Non-throwing functions are permitted to call potentially-throwing functions. Whenever an exception is thrown and the search for a handler encounters the outermost block of a non-throwing function, the function std::terminate is called.
+不抛异常的函数允许调用可能抛异常的函数。每当有异常抛出，而处理程序的查找遇到不抛异常函数的最外层块时，就会调用函数 std::terminate。
 
 ```c++
 extern void f();  // potentially-throwing
@@ -691,25 +691,25 @@ void g() noexcept {
 }
 ```
 
-### char32_t and char16_t
-Provides standard types for representing UTF-8 strings.
+### char32_t 和 char16_t
+为表示 UTF-8 字符串提供了标准类型。
 ```c++
 char32_t utf8_str[] = U"\u0123";
 char16_t utf8_str[] = u"\u0123";
 ```
 
-### Raw string literals
-C++11 introduces a new way to declare string literals as "raw string literals". Characters issued from an escape sequence (tabs, line feeds, single backslashes, etc.) can be inputted raw while preserving formatting. This is useful, for example, to write literary text, which might contain a lot of quotes or special formatting. This can make your string literals easier to read and maintain.
+### 原始字符串字面量
+C++11 引入了一种将字符串字面量声明为“原始字符串字面量”的新方式。由转义序列产生的字符（制表符、换行符、单个反斜杠等）可以直接原样输入，同时保留格式。这在例如撰写可能包含大量引号或特殊格式的文学文本时很有用。这可以让你的字符串字面量更易于阅读和维护。
 
-A raw string literal is declared using the following syntax:
+原始字符串字面量使用以下语法声明：
 ```
 R"delimiter(raw_characters)delimiter"
 ```
-where:
-* `delimiter` is an optional sequence of characters made of any source character except parentheses, backslashes and spaces.
-* `raw_characters` is any raw character sequence; must not contain the closing sequence `")delimiter"`.
+其中：
+* `delimiter` 是一个可选的字符序列，由除圆括号、反斜杠和空格之外的任意源字符组成。
+* `raw_characters` 是任意原始字符序列；不能包含结束序列 `")delimiter"`。
 
-Example:
+示例：
 ```cpp
 // msg1 and msg2 are equivalent.
 const char* msg1 = "\nHello,\n\tworld!\n";
@@ -719,12 +719,12 @@ Hello,
 )";
 ```
 
-## C++11 Library Features
+## C++11 库特性
 
 ### std::move
-`std::move` indicates that the object passed to it may have its resources transferred. Using objects that have been moved from should be used with care, as they can be left in an unspecified state (see: [What can I do with a moved-from object?](http://stackoverflow.com/questions/7027523/what-can-i-do-with-a-moved-from-object)).
+`std::move` 表示传给它的对象其资源可能被转移。使用被移动过的对象时应当小心，因为它们可能处于未指定的状态（参见：[What can I do with a moved-from object?](http://stackoverflow.com/questions/7027523/what-can-i-do-with-a-moved-from-object)）。
 
-A definition of `std::move` (performing a move is nothing more than casting to an rvalue reference):
+`std::move` 的一种定义（执行移动不过就是转换为右值引用）：
 ```c++
 template <typename T>
 typename remove_reference<T>::type&& move(T&& arg) {
@@ -732,7 +732,7 @@ typename remove_reference<T>::type&& move(T&& arg) {
 }
 ```
 
-Transferring `std::unique_ptr`s:
+转移 `std::unique_ptr`：
 ```c++
 std::unique_ptr<int> p1 {new int{0}};  // in practice, use std::make_unique
 std::unique_ptr<int> p2 = p1; // error -- cannot copy unique pointers
@@ -741,9 +741,9 @@ std::unique_ptr<int> p3 = std::move(p1); // move `p1` into `p3`
 ```
 
 ### std::forward
-Returns the arguments passed to it while maintaining their value category and cv-qualifiers. Useful for generic code and factories. Used in conjunction with [`forwarding references`](#forwarding-references).
+返回传给它的参数，同时保持参数的值类别和 cv 限定符。对于泛型代码和工厂函数很有用。它通常与[转发引用](#转发引用)配合使用。
 
-A definition of `std::forward`:
+`std::forward` 的一种定义：
 ```c++
 template <typename T>
 T&& forward(typename remove_reference<T>::type& arg) {
@@ -751,7 +751,7 @@ T&& forward(typename remove_reference<T>::type& arg) {
 }
 ```
 
-An example of a function `wrapper` which just forwards other `A` objects to a new `A` object's copy or move constructor:
+下面是一个函数 `wrapper` 的例子，它只是把其他的 `A` 对象转发给一个新的 `A` 对象的拷贝构造函数或移动构造函数：
 ```c++
 struct A {
   A() = default;
@@ -770,10 +770,10 @@ wrapper(a); // copied
 wrapper(std::move(a)); // moved
 ```
 
-See also: [`forwarding references`](#forwarding-references), [`rvalue references`](#rvalue-references).
+参见：[`转发引用`](#转发引用)、[`右值引用`](#右值引用)。
 
 ### std::thread
-The `std::thread` library provides a standard way to control threads, such as spawning and killing them. In the example below, multiple threads are spawned to do different calculations and then the program waits for all of them to finish.
+`std::thread` 库提供了一种控制线程的标准方式，例如创建和终止线程。在下面的例子中，创建了多个线程来执行不同的计算，然后程序等待它们全部结束。
 
 ```c++
 void foo(bool clause) { /* do something... */ }
@@ -789,24 +789,24 @@ for (auto& thread : threadsVector) {
 ```
 
 ### std::to_string
-Converts a numeric argument to a `std::string`.
+将数值实参转换为 `std::string`。
 ```c++
 std::to_string(1.2); // == "1.2"
 std::to_string(123); // == "123"
 ```
 
-### Type traits
-Type traits defines a compile-time template-based interface to query or modify the properties of types.
+### 类型萃取
+类型萃取（type traits）定义了一套编译期、基于模板的接口，用于查询或修改类型的属性。
 ```c++
 static_assert(std::is_integral<int>::value);
 static_assert(std::is_same<int, int>::value);
 static_assert(std::is_same<std::conditional<true, int, double>::type, int>::value);
 ```
 
-### Smart pointers
-C++11 introduces new smart pointers: `std::unique_ptr`, `std::shared_ptr`, `std::weak_ptr`. `std::auto_ptr` now becomes deprecated and then eventually removed in C++17.
+### 智能指针
+C++11 引入了新的智能指针：`std::unique_ptr`、`std::shared_ptr`、`std::weak_ptr`。`std::auto_ptr` 现在已被弃用，并最终在 C++17 中被移除。
 
-`std::unique_ptr` is a non-copyable, movable pointer that manages its own heap-allocated memory. **Note: Prefer using the `std::make_X` helper functions as opposed to using constructors. See the sections for [std::make_unique](https://github.com/AnthonyCalandra/modern-cpp-features/blob/master/CPP14.md#stdmake_unique) and [std::make_shared](#stdmake_shared).**
+`std::unique_ptr` 是一个不可复制、可移动的指针，它管理自己堆分配的内存。**注意：优先使用 `std::make_X` 辅助函数，而不是直接使用构造函数。参见 [std::make_unique](https://github.com/AnthonyCalandra/modern-cpp-features/blob/master/CPP14.md#stdmake_unique) 和 [std::make_shared](#stdmake_shared) 两节。**
 ```c++
 std::unique_ptr<Foo> p1 { new Foo{} };  // `p1` owns `Foo`
 if (p1) {
@@ -826,7 +826,7 @@ if (p1) {
 // `Foo` instance is destroyed when `p1` goes out of scope
 ```
 
-A `std::shared_ptr` is a smart pointer that manages a resource that is shared across multiple owners. A shared pointer holds a _control block_ which has a few components such as the managed object and a reference counter. All control block access is thread-safe, however, manipulating the managed object itself is *not* thread-safe.
+`std::shared_ptr` 是一种智能指针，它管理被多个所有者共享的资源。共享指针持有一个*控制块*，其中包含若干组成部分，例如被管理的对象和一个引用计数器。所有对控制块的访问都是线程安全的，但是对被管理对象本身的操作*不是*线程安全的。
 ```c++
 void foo(std::shared_ptr<T> t) {
   // Do something with `t`...
@@ -848,7 +848,7 @@ baz(p1);
 ```
 
 ### std::chrono
-The chrono library contains a set of utility functions and types that deal with _durations_, _clocks_, and _time points_. One use case of this library is benchmarking code:
+chrono 库包含一组用于处理*时长*（durations）、*时钟*（clocks）和*时间点*（time points）的工具函数和类型。这个库的一个用例是给代码做基准测试：
 ```c++
 std::chrono::time_point<std::chrono::steady_clock> start, end;
 start = std::chrono::steady_clock::now();
@@ -859,8 +859,8 @@ std::chrono::duration<double> elapsed_seconds = end - start;
 double t = elapsed_seconds.count(); // t number of seconds, represented as a `double`
 ```
 
-### Tuples
-Tuples are a fixed-size collection of heterogeneous values. Access the elements of a `std::tuple` by unpacking using [`std::tie`](#stdtie), or using `std::get`.
+### 元组
+元组是固定大小的异构值集合。可以通过使用 [`std::tie`](#stdtie) 解包，或者使用 `std::get` 来访问 `std::tuple` 的元素。
 ```c++
 // `playerProfile` has type `std::tuple<int, const char*, const char*>`.
 auto playerProfile = std::make_tuple(51, "Frans Nielsen", "NYI");
@@ -870,7 +870,7 @@ std::get<2>(playerProfile); // "NYI"
 ```
 
 ### std::tie
-Creates a tuple of lvalue references. Useful for unpacking `std::pair` and `std::tuple` objects. Use `std::ignore` as a placeholder for ignored values. In C++17, structured bindings should be used instead.
+创建一个左值引用的元组。对于解包 `std::pair` 和 `std::tuple` 对象很有用。使用 `std::ignore` 作为被忽略值的占位符。在 C++17 中，应该改用结构化绑定。
 ```c++
 // With tuples...
 std::string playerName;
@@ -882,38 +882,38 @@ std::tie(yes, no) = std::make_pair("yes", "no");
 ```
 
 ### std::array
-`std::array` is a container built on top of a C-style array. Supports common container operations such as sorting.
+`std::array` 是构建在 C 风格数组之上的容器。支持常见的容器操作，例如排序。
 ```c++
 std::array<int, 3> a = {2, 1, 3};
 std::sort(a.begin(), a.end()); // a == { 1, 2, 3 }
 for (int& x : a) x *= 2; // a == { 2, 4, 6 }
 ```
 
-### Unordered containers
-These containers maintain average constant-time complexity for search, insert, and remove operations. In order to achieve constant-time complexity, sacrifices order for speed by hashing elements into buckets. There are four unordered containers:
+### 无序容器
+这些容器在查找、插入和删除操作上保持平均常数时间复杂度。为了达到常数时间复杂度，它们牺牲了顺序来换取速度，即通过哈希把元素分到不同的桶中。共有四种无序容器：
 * `unordered_set`
 * `unordered_multiset`
 * `unordered_map`
 * `unordered_multimap`
 
 ### std::make_shared
-`std::make_shared` is the recommended way to create instances of `std::shared_ptr`s due to the following reasons:
-* Avoid having to use the `new` operator.
-* Prevents code repetition when specifying the underlying type the pointer shall hold.
-* It provides exception-safety. Suppose we were calling a function `foo` like so:
+`std::make_shared` 是创建 `std::shared_ptr` 实例的推荐方式，原因如下：
+* 避免使用 `new` 运算符。
+* 在指定指针所持有的底层类型时，避免代码重复。
+* 它提供了异常安全性。假设我们像下面这样调用函数 `foo`：
 ```c++
 foo(std::shared_ptr<T>{new T{}}, function_that_throws(), std::shared_ptr<T>{new T{}});
 ```
-The compiler is free to call `new T{}`, then `function_that_throws()`, and so on... Since we have allocated data on the heap in the first construction of a `T`, we have introduced a leak here. With `std::make_shared`, we are given exception-safety:
+编译器可以自由地先调用 `new T{}`，再调用 `function_that_throws()`，等等……由于我们在第一次构造 `T` 时已经在堆上分配了数据，这里就引入了内存泄漏。使用 `std::make_shared`，我们就获得了异常安全性：
 ```c++
 foo(std::make_shared<T>(), function_that_throws(), std::make_shared<T>());
 ```
-* Prevents having to do two allocations. When calling `std::shared_ptr{ new T{} }`, we have to allocate memory for `T`, then in the shared pointer we have to allocate memory for the control block within the pointer.
+* 避免进行两次分配。当调用 `std::shared_ptr{ new T{} }` 时，我们需要为 `T` 分配内存，然后还要在共享指针内部为控制块分配内存。
 
-See the section on [smart pointers](#smart-pointers) for more information on `std::unique_ptr` and `std::shared_ptr`.
+有关 `std::unique_ptr` 和 `std::shared_ptr` 的更多信息，参见[智能指针](#智能指针)一节。
 
 ### std::ref
-`std::ref(val)` is used to create object of type `std::reference_wrapper` that holds reference of val. Used in cases when usual reference passing using `&` does not compile or `&` is dropped due to type deduction. `std::cref` is similar but created reference wrapper holds a const reference to val.
+`std::ref(val)` 用于创建持有 val 引用的 `std::reference_wrapper` 类型对象。适用于使用 `&` 进行常规引用传递无法通过编译，或者 `&` 因类型推导而被丢弃的情况。`std::cref` 类似，但它创建的引用包装器持有对 val 的常量引用。
 
 ```c++
 // create a container to store reference of objects.
@@ -929,18 +929,18 @@ cout << vec[0] << endl; // prints 100
 cout << _cref; // prints 100
 ```
 
-### Memory model
-C++11 introduces a memory model for C++, which means library support for threading and atomic operations. Some of these operations include (but aren't limited to) atomic loads/stores, compare-and-swap, atomic flags, promises, futures, locks, and condition variables.
+### 内存模型
+C++11 为 C++ 引入了内存模型，这意味着对线程和原子操作的库支持。其中一些操作包括（但不限于）原子加载/存储、比较并交换（compare-and-swap）、原子标志、promise、future、锁以及条件变量。
 
-See the sections on: [std::thread](#stdthread)
+参见：[std::thread](#stdthread) 一节。
 
 ### std::async
-`std::async` runs the given function either asynchronously or lazily-evaluated, then returns a `std::future` which holds the result of that function call.
+`std::async` 以异步方式或惰性求值方式运行给定的函数，然后返回一个持有该函数调用结果的 `std::future`。
 
-The first parameter is the policy which can be:
-1. `std::launch::async | std::launch::deferred` It is up to the implementation whether to perform asynchronous execution or lazy evaluation.
-1. `std::launch::async` Run the callable object on a new thread.
-1. `std::launch::deferred` Perform lazy evaluation on the current thread.
+第一个参数是策略，可以是：
+1. `std::launch::async | std::launch::deferred` 由实现决定是执行异步执行还是惰性求值。
+1. `std::launch::async` 在新线程上运行可调用对象。
+1. `std::launch::deferred` 在当前线程上执行惰性求值。
 
 ```c++
 int foo() {
@@ -953,7 +953,7 @@ auto result = handle.get();  // wait for the result
 ```
 
 ### std::begin/end
-`std::begin` and `std::end` free functions were added to return begin and end iterators of a container generically. These functions also work with raw arrays which do not have `begin` and `end` member functions.
+新增了 `std::begin` 和 `std::end` 自由函数，用于以通用方式返回容器的起始和结束迭代器。这些函数也能用于没有 `begin` 和 `end` 成员函数的原始数组。
 
 ```c++
 template <typename T>
@@ -969,22 +969,22 @@ auto a = CountTwos(vec); // 2
 auto b = CountTwos(arr);  // 1
 ```
 
-## Acknowledgements
-* [cppreference](http://en.cppreference.com/w/cpp) - especially useful for finding examples and documentation of new library features.
-* [C++ Rvalue References Explained](http://web.archive.org/web/20240324121501/http://thbecker.net/articles/rvalue_references/section_01.html) - a great introduction I used to understand rvalue references, perfect forwarding, and move semantics.
-* [clang](http://clang.llvm.org/cxx_status.html) and [gcc](https://gcc.gnu.org/projects/cxx-status.html)'s standards support pages. Also included here are the proposals for language/library features that I used to help find a description of, what it's meant to fix, and some examples.
+## 致谢
+* [cppreference](http://en.cppreference.com/w/cpp) - 对查找新库特性的示例和文档特别有用。
+* [C++ Rvalue References Explained](http://web.archive.org/web/20240324121501/http://thbecker.net/articles/rvalue_references/section_01.html) - 我用来理解右值引用、完美转发和移动语义的优秀入门资料。
+* [clang](http://clang.llvm.org/cxx_status.html) 和 [gcc](https://gcc.gnu.org/projects/cxx-status.html) 的标准支持页面。其中还包含了语言/库特性的提案，我借助这些提案来了解相关特性的描述、它要解决的问题以及一些示例。
 * [Compiler explorer](https://godbolt.org/)
-* [Scott Meyers' Effective Modern C++](https://www.amazon.com/Effective-Modern-Specific-Ways-Improve/dp/1491903996) - highly recommended book!
-* [Jason Turner's C++ Weekly](https://www.youtube.com/channel/UCxHAlbZQNFU2LgEtiqd2Maw) - nice collection of C++-related videos.
+* [Scott Meyers 的《Effective Modern C++》](https://www.amazon.com/Effective-Modern-Specific-Ways-Improve/dp/1491903996) - 强烈推荐的书！
+* [Jason Turner 的 C++ Weekly](https://www.youtube.com/channel/UCxHAlbZQNFU2LgEtiqd2Maw) - 优秀的 C++ 相关视频合集。
 * [What can I do with a moved-from object?](http://stackoverflow.com/questions/7027523/what-can-i-do-with-a-moved-from-object)
 * [What are some uses of decltype(auto)?](http://stackoverflow.com/questions/24109737/what-are-some-uses-of-decltypeauto)
-* And many more SO posts I'm forgetting...
+* 以及许多我已经忘记的 Stack Overflow 帖子……
 
-## Author
+## 作者
 Anthony Calandra
 
-## Content Contributors
-See: https://github.com/AnthonyCalandra/modern-cpp-features/graphs/contributors
+## 内容贡献者
+参见：https://github.com/AnthonyCalandra/modern-cpp-features/graphs/contributors
 
-## License
+## 许可证
 MIT
